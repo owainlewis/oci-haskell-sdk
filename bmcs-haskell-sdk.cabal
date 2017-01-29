@@ -15,16 +15,10 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Lib
+  exposed-modules:     Network.Oracle.BMCS.Api
   build-depends:       base >= 4.7 && < 5
-  default-language:    Haskell2010
-
-executable bmcs-haskell-sdk-exe
-  hs-source-dirs:      app
-  main-is:             Main.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , bmcs-haskell-sdk
+                     , text
+                     , ini == 0.3.5
   default-language:    Haskell2010
 
 test-suite bmcs-haskell-sdk-test
