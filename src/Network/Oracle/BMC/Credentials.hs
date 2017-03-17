@@ -1,14 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Network.Oracle.BMCS.Credentials
+-- Module      :  Network.Oracle.BMC.Credentials
 -- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  Owain Lewis <owain@owainlewis.com>
 --
--- This module defined readers and types for Oracle BMCS credentials
+-- This module defined readers and types for Oracle BMC credentials
 -----------------------------------------------------------------------------
-module Network.Oracle.BMCS.Credentials
+module Network.Oracle.BMC.Credentials
     ( Credentials(..)
     , fromFile
     , parseCredentials
@@ -42,7 +42,7 @@ data Credentials = Credentials {
 
 -- | Extract a credentials object
 --
-parseCredentialsFor :: String -> Ini -> Either String Credentials
+parseCredentialsFor :: T.Text -> Ini -> Either String Credentials
 parseCredentialsFor key ini = do
     user <- lookupValue key "user" ini
     fingerprint <- lookupValue key "fingerprint" ini
@@ -51,7 +51,7 @@ parseCredentialsFor key ini = do
     return $ Credentials user fingerprint keyFile tenancy
 
 parseCredentials :: Ini -> Either String Credentials
-parseCredentials = parseCredentialsfor "DEFAULT"
+parseCredentials = parseCredentialsFor "DEFAULT"
 
 fromFile :: FilePath -> IO (Either String Credentials)
 fromFile path = do
