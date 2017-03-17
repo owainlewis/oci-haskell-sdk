@@ -1,14 +1,14 @@
 name:                bmcs-haskell-sdk
 version:             0.1.0.0
-synopsis:            Initial project template from stack
+synopsis:            Haskell driver for Oracle Bare Metal Cloud
 description:         Please see README.md
 homepage:            https://github.com/owainlewis/bmcs-haskell-sdk#readme
 license:             BSD3
 license-file:        LICENSE
 author:              Owain Lewis
 maintainer:          owain@owainlewis.com
-copyright:           2016 Owain Lewis
-category:            Web
+copyright:           2017 Owain Lewis
+category:            Network
 build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
@@ -18,8 +18,7 @@ library
   exposed-modules:     Network.Oracle.BMCS.Api
   build-depends:       base >= 4.7 && < 5
                      , text
-                     , ini == 0.3.5
-                     , wreq
+                     , ini >= 0.3.5
   default-language:    Haskell2010
 
 test-suite bmcs-haskell-sdk-test
