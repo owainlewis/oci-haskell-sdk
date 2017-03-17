@@ -7,13 +7,20 @@ import Network.HTTP.Types.Status (statusCode)
 
 base = "https://iaas.us-phoenix-1.oraclecloud.com/20160918/vcns"
 
-main :: IO ()
-main = do
+-- Core Services API: https://iaas.us-phoenix-1.oraclecloud.com (covering the Networking Service, Compute Service, and Block Volume Service)
+-- Load Balancing Service API: https://iaas.us-phoenix-1.oraclecloud.com
+-- IAM Service API: https://identity.us-phoenix-1.oraclecloud.com
+-- Object Storage Service API: https://objectstorage.us-phoenix-1.oraclecloud.com
+-- Database Service API: https://database.us-phoenix-1.oraclecloud.com
+-- Audit Service API: https://audit.us-phoenix-1.oraclecloud.com
+
+
+runRequest method url = do
     manager <- newManager tlsManagerSettings
-    initialRequest <- parseRequest base
-    let request = initialRequest { method = "GET" }
+    initialRequest <- parseRequest url
+    let request = initialRequest { method = method }
     response <- httpLbs request manager
-    putStrLn $ "The status code was: " ++ (show $ statusCode $ responseStatus response)
+    return response
 
 
 
