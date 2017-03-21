@@ -26,6 +26,8 @@ import           Data.Ini            (Ini, lookupValue, parseIni)
 import           Data.Semigroup      ((<>))
 import           System.Environment  (getEnv)
 
+import Control.Exception
+
 type CredentialError = String
 
 defaultLocation :: IO FilePath
@@ -84,5 +86,5 @@ loadCredentials = do
         Left e -> return (Left e)
         Right (BMCCredentials u f k t) -> do
             -- TODO (OL) Catch the IO exception and pass to Left
-            sshKeyRaw <- TIO.readFile (T.unpack k)
+            sshKeyRaw <- catch (TIO.readFile (T.unpack k)) (\e -> return "")
             return . Right $ Credentials u f sshKeyRaw t
