@@ -1,5 +1,7 @@
 module Network.Oracle.BMC.Signature where
 
+-- Used to sign HTTP request to the Oracle BMCS API
+
 import qualified Codec.Crypto.RSA as RSA
 
 import Codec.Crypto.RSA (sign)
@@ -8,11 +10,6 @@ import Crypto.Types.PubKey.RSA (PrivateKey)
 
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as LBS
-
-throwLeft :: Either String OpenSshPrivateKey -> PrivateKey
-throwLeft (Right (OpenSshPrivateKeyRsa k)) = k
-throwLeft (Right _) = error "Wrong key type"
-throwLeft (Left s)  = error $ "Error reading keys: " ++ s
 
 throwLeftIO :: (Monad m, Show a) => m (Either a b) -> m b
 throwLeftIO either = do
@@ -34,5 +31,9 @@ loadSSHPrivateKey = throwLeftIO . loadPrivateKey
 
 -- Sign and input with some private key
 signWithKey :: FilePath -> LBS.ByteString -> IO (LBS.ByteString)
-signWithKey keyPath input =
-    loadSSHPrivateKey keyPath >>= (\k -> return $ RSA.sign k input)
+signWithKey keyPath input = loadSSHPrivateKey keyPath >>= (\k -> return $ RSA.sign k input)
+
+-- | Bytestrings probably easier here
+--
+signWithKey' :: FilePath -> BS.ByteString -> IO BS.ByteString
+signWithKey' keyPath input = LBS.toStrict <$> signWithKey keyPath (LBS.fromStrict input)
