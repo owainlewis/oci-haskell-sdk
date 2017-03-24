@@ -86,5 +86,5 @@ loadCredentials = do
         Left e -> return (Left e)
         Right (BMCCredentials u f k t) -> do
             -- TODO (OL) Catch the IO exception and pass to Left
-            sshKeyRaw <- catch (TIO.readFile (T.unpack k)) (\e -> return "")
+            sshKeyRaw <- TIO.readFile (T.unpack k)
             return . Right $ Credentials u f sshKeyRaw t
