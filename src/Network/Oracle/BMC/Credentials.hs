@@ -25,35 +25,30 @@ import           Control.Applicative ((<$>))
 import           Data.Ini            (Ini, lookupValue, parseIni)
 import           Data.Semigroup      ((<>))
 import           System.Environment  (getEnv)
+import           Control.Exception
 
-import Control.Exception
+import qualified Network.Oracle.BMC.Path as Path
 
 type CredentialError = String
 
+-- | The default location for Oracle BMC credentials
+--
 defaultLocation :: IO FilePath
-defaultLocation = (\homeDir -> homeDir <> "/.oraclebmc/config") <$> getEnv "HOME"
+defaultLocation = Path.expand "~/.oraclebmc/config"
 
--- Example credentials
---
--- >  [DEFAULT]
--- >  user=ocid1.user.oc1..aaaaaaaat5nv...
--- >  fingerprint=20:3b:97:13:55:1c:5b:0d:d3:37:d8:50:4e:c5:3a:39
--- >  key_file=~/.oraclebmc/bmcs_api_key.pem
--- >  tenancy=ocid1.tenancy.oc1..aaaaaaaaba3pv6wkcr4jqae5f1...
---
 data BMCCredentials = BMCCredentials {
     bmcUser        :: T.Text
   , bmcFingerprint :: T.Text
   , bmcKeyFile     :: T.Text
   , bmcTenancy     :: T.Text
-} deriving ( Eq, Show )
+} deriving ( Eq, Read, Show )
 
 data Credentials = Credentials {
     user        :: T.Text  -- User OCID
   , fingerprint :: T.Text  -- Fingerprint of private SSH key
   , key         :: T.Text  -- Raw private SSH key contents
   , tenancy     :: T.Text  -- Tenancy OCID
-} deriving ( Eq, Show )
+} deriving ( Eq, Read, Show )
 
 -- | Extract a credentials object
 --
@@ -63,7 +58,8 @@ parseBMCCredentials key ini = do
     fingerprint <- lookupValue key "fingerprint" ini
     keyFile <- lookupValue key "key_file" ini
     tenancy <- lookupValue key "tenancy" ini
-    return $ BMCCredentials user fingerprint keyFile tenancy
+    let credentials = BMCCredentials user fingerprint keyFile tenancy
+    return credentials
 
 fromFile :: FilePath -> IO (Either CredentialError BMCCredentials)
 fromFile path = do
@@ -77,8 +73,6 @@ loadDefaultBMCCredentials = fromFile =<< defaultLocation
 --
 -- This provides everything needed to authenticate a user
 --
--- This will fail on unexpanded paths for SSH key (~/.oraclebmc) and if the key
--- does not exist
 loadCredentials :: IO (Either CredentialError Credentials)
 loadCredentials = do
     creds <- loadDefaultBMCCredentials
@@ -86,5 +80,6 @@ loadCredentials = do
         Left e -> return (Left e)
         Right (BMCCredentials u f k t) -> do
             -- TODO (OL) Catch the IO exception and pass to Left
-            sshKeyRaw <- TIO.readFile (T.unpack k)
+            expandedKeyPath <- Path.expand (T.unpack k)
+            sshKeyRaw <- TIO.readFile expandedKeyPath
             return . Right $ Credentials u f sshKeyRaw t
