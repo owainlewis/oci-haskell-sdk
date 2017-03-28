@@ -1,5 +1,8 @@
 module Network.Oracle.BMC.SignatureSpec where
 
+import qualified Network.Oracle.BMC.Signature as Signature
+import qualified Data.ByteString.Char8 as C
+
 publicKey :: String
 publicKey = unlines
   [ "-----BEGIN PUBLIC KEY-----"
@@ -26,9 +29,14 @@ privateKey = unlines
   , "gIT7aFOYBFwGgQAQkWNKLvySgKbAZRTeLBacpHMuQdl1DntvAyqpAZ0lY0RKmW"
   , "G6aFKaqQfOXKCyWoUiVknQJAXrlgySFci/2ueKlIE1QqIiLSZ8V8OlpFLRnb1pzI"
   , "7U1yQXnTAEFYM560yJlzUpOb1V4cScGd365tiSMvxLOvTA=="
-  , "  -----END RSA PRIVATE KEY-----"
+  , "-----END RSA PRIVATE KEY-----"
   ]
 
+signingString = unlines
+  [ "date: Thu, 05 Jan 2014 21:31:40 GMT"
+  , "(request-target): get /20160918/instances?availabilityDomain=Pjwf%3A%20PHX-AD-1&compartmentId=ocid1.compartment.oc1..aaaaaaaam3we6vgnherjq5q2idnccdflvjsnog7mlr6rtdb25gilchfeyjxa&displayName=TeamXInstances&volumeId=ocid1.volume.oc1.phx.abyhqljrgvttnlx73nmrwfaux7kcvzfs3s66izvxf2h4lgvyndsdsnoiwr5q"
+  , "host: iaas.us-phoenix-1.oraclecloud.com"
+  ]
 
 -- For the following GET request (line breaks inserted between query parameters for easier reading; also notice the URL encoding as mentioned earlier):
 
@@ -57,3 +65,6 @@ privateKey = unlines
 --   ",signature="GBas7grhyrhSKHP6AVIj/h5/Vp8bd/peM79H9Wv8kjoaCivujVXlpbKLjMPe
 --   DUhxkFIWtTtLBj3sUzaFj34XE6YZAHc9r2DmE4pMwOAy/kiITcZxa1oHPOeRheC0jP2dqbTll
 --   8fmTZVwKZOKHYPtrLJIJQHJjNvxFWeHQjMaR7M="
+
+
+key = Signature.sign "test/Fixtures/bmcs_api_key.pem" (C.pack "Hello, World")
