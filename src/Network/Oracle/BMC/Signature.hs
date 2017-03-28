@@ -1,48 +1,40 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Network.Oracle.BMC.Signature
-    ( sign
-    , signWithKey
+    ( signWithKey
+    , sign
     , signBase64
     , loadPrivateKey
-    , parsePrivateKey
+    , SignatureException(..)
     ) where
 
-import           Crypto.Types.PubKey.RSA (PrivateKey, PublicKey)
-import           Crypto.PubKey.OpenSsh   (OpenSshPrivateKey (..), decodePrivate)
+import           Crypto.PubKey.OpenSsh      (OpenSshPrivateKey (..),
+                                             decodePrivate)
+import           Crypto.Types.PubKey.RSA    (PrivateKey, PublicKey)
 
-import qualified Codec.Crypto.RSA.Pure   as RSA
-import qualified Data.ByteString         as BS
-import qualified Data.ByteString.Lazy.Char8   as C
-import qualified Data.ByteString.Base64  as B64
+import qualified Codec.Crypto.RSA.Pure      as RSA
+import qualified Data.ByteString            as BS
+import qualified Data.ByteString.Base64     as B64
+import qualified Data.ByteString.Lazy.Char8 as C
 
-import Data.Bifunctor(bimap)
+import           Data.Bifunctor             (bimap)
 
 data SignatureException = InvalidRSAKeyException
                         | KeyReadException
                         deriving ( Eq, Read, Show )
 
-defaultKeyPath :: FilePath
-defaultKeyPath = "/home/owainlewis/.oraclebmc/bmcs_api_key.pem"
-
-throwLeft :: Either String OpenSshPrivateKey -> PrivateKey
-throwLeft (Right (OpenSshPrivateKeyRsa k)) = k
-throwLeft (Right _) = error ("Invalid RSA key type")
-throwLeft (Left e)  = error ("Error reading private key " ++ e)
+extractPrivateKey :: Either String OpenSshPrivateKey -> PrivateKey
+extractPrivateKey (Right (OpenSshPrivateKeyRsa k)) = k
+extractPrivateKey (Right _) = error ("Invalid RSA key type")
+extractPrivateKey (Left e)  = error ("Error reading private key " ++ e)
 
 loadPrivateKey :: FilePath -> IO PrivateKey
-loadPrivateKey keyPath = (throwLeft . decodePrivate) <$> BS.readFile keyPath
-
-parsePrivateKey = throwLeft . decodePrivate
+loadPrivateKey keyPath = (extractPrivateKey . decodePrivate) <$> BS.readFile keyPath
 
 sign :: FilePath -> BS.ByteString -> IO (Either RSA.RSAError BS.ByteString)
-sign keyPath input = loadPrivateKey keyPath >>= (flip signWithKey input)
+sign keyPath input = (flip signWithKey input) <$> loadPrivateKey keyPath
 
-signWithKey :: Monad m => PrivateKey -> BS.ByteString -> m (Either RSA.RSAError BS.ByteString)
-signWithKey key input = do
-    let signature = RSA.sign key (C.fromStrict input)
-    case signature of
-        Left e -> return $ Left e
-        Right sig -> return $ Right (C.toStrict sig)
+signWithKey :: PrivateKey -> BS.ByteString -> Either RSA.RSAError BS.ByteString
+signWithKey key input = bimap id (C.toStrict) (RSA.sign key (C.fromStrict input))
 
 signBase64 :: FilePath -> BS.ByteString -> IO (Either RSA.RSAError BS.ByteString)
 signBase64 keyPath input = do
