@@ -1,5 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Network.Oracle.BMC.Transport.Request where
+module Network.Oracle.BMC.Transport.Request
+    ( HttpRequest(..)
+    , HttpMethod(..)
+    , runHttpsRequest
+    ) where
 
 import           Network.HTTP.Client
 import           Network.HTTP.Client.TLS
