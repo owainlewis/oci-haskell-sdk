@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Network.Oracle.BMC.Transport.Request
     ( HttpRequest(..)
+    , HttpResponse
     , HttpMethod(..)
     , URL
     , Headers
@@ -43,6 +44,7 @@ data HttpRequest = HttpRequest { httpMethod :: HttpMethod
                                } deriving ( Eq, Read, Show )
 
 
+type HttpResponse = Network.HTTP.Client.Response LBS.ByteString
 -- | Construct a HTTP GET request
 --
 --   You can also set the query string
@@ -87,7 +89,7 @@ transformRequest request =
 
 -- | TODO pass options (i.e proxy stuff) into here
 
-runHttpsRequest :: HttpRequest -> IO (Network.HTTP.Client.Response LBS.ByteString)
+runHttpsRequest :: HttpRequest -> IO HttpResponse
 runHttpsRequest req = do
     manager <- newManager tlsManagerSettings
     internalRequest <- transformRequest req

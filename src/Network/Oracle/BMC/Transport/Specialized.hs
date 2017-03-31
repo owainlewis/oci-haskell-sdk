@@ -1,9 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Network.Oracle.BMC.Transport.Specialized where
 
-import qualified Network.HTTP.Client as Client
+import qualified Network.HTTP.Client                  as Client
 import qualified Network.Oracle.BMC.Transport.Request as Request
 
+import qualified Data.ByteString                      as BS
 
 import           Data.Time                            (defaultTimeLocale,
                                                        formatTime, getZonedTime)
@@ -11,21 +12,15 @@ import           Data.Time                            (defaultTimeLocale,
 getNow :: IO String
 getNow = formatTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %Z" <$> getZonedTime
 
-genericHeaders = ["(request-target)"
-                 , "host"
-                 , "date"
-                 ]
+genericHeaders :: [BS.ByteString]
+genericHeaders = ["(request-target)", "host", "date"]
 
-bodyHeaders = [ "x-content-sha256"
-              , "content-type"
-              , "content-length"
-              ]
+bodyHeaders :: [BS.ByteString]
+bodyHeaders = ["x-content-sha256", "content-type", "content-length"]
 
-withRequestTarget :: Client.Request -> Client.Request
-withRequestTarget request =
-      let path = Client.path request
-          query = Client.queryString request
-          method = Client.method request
-      in path
-
-      
+-- withRequestTarget :: Client.Request -> Client.Request
+-- withRequestTarget request =
+--       let path = Client.path request
+--           query = Client.queryString request
+--           method = Client.method request
+--       in path
