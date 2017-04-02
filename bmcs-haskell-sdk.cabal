@@ -29,6 +29,7 @@ library
                      , http-client-tls
                      , http-types >= 0.9.1
                      , ini >= 0.3.5
+                     , network-uri >= 2.6.1.0
                      , text
                      , time >= 1.6.0.1
   default-language:    Haskell2010

@@ -4,7 +4,7 @@ module Network.Oracle.BMC.Transport.Request
     , HttpResponse
     , HttpMethod(..)
     , URL
-    , Headers
+    , Header
     , runHttpsRequest
     , get
     , post
@@ -26,7 +26,7 @@ import qualified Data.CaseInsensitive      as CI
 
 type URL     = String
 
-type Headers = [(BS.ByteString, BS.ByteString)]
+type Header  = (BS.ByteString, BS.ByteString)
 
 data HttpMethod = GET
                 | POST
@@ -38,11 +38,14 @@ data HttpMethod = GET
 
 data HttpRequest = HttpRequest { httpMethod :: HttpMethod
                                , url :: String
-                               , headers :: [(BS.ByteString, BS.ByteString)]
+                               , headers :: [Header]
                                , body :: Maybe BS.ByteString
                                , query :: Maybe [(BS.ByteString, BS.ByteString)]
                                } deriving ( Eq, Read, Show )
 
+withHeader :: HttpRequest -> Header -> HttpRequest
+withHeader request@(HttpRequest _ _ h _ _) header =
+    request { headers = header : h }
 
 type HttpResponse = Network.HTTP.Client.Response LBS.ByteString
 -- | Construct a HTTP GET request
@@ -59,16 +62,16 @@ type HttpResponse = Network.HTTP.Client.Response LBS.ByteString
 --   , query = Just []
 --   }
 --
-get :: URL -> Headers -> HttpRequest
+get :: URL -> [Header] -> HttpRequest
 get url headers = HttpRequest GET url headers Nothing Nothing
 
-post :: URL -> Headers -> Maybe BS.ByteString -> HttpRequest
+post :: URL -> [Header] -> Maybe BS.ByteString -> HttpRequest
 post url headers body = HttpRequest POST url headers body Nothing
 
-put :: URL -> Headers -> Maybe BS.ByteString -> HttpRequest
+put :: URL -> [Header] -> Maybe BS.ByteString -> HttpRequest
 put url headers body = HttpRequest PUT url headers body Nothing
 
-delete :: URL -> Headers -> HttpRequest
+delete :: URL -> [Header] -> HttpRequest
 delete url headers = HttpRequest DELETE url headers Nothing Nothing
 
 -- | Request / Response
