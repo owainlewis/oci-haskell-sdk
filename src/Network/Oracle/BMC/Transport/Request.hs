@@ -64,7 +64,7 @@ type HttpResponse = Network.HTTP.Client.Response LBS.ByteString
 --   , url = "https://github.com"
 --   , headers = []
 --   , body = Nothing
---   , query = Noting
+--   , query = Nothing
 --   }
 --
 get :: URL -> [Header] -> HttpRequest
@@ -80,7 +80,6 @@ delete :: URL -> [Header] -> HttpRequest
 delete url headers = HttpRequest DELETE url headers Nothing Nothing
 
 -------------------------------------------------------------------------------
-
 
 -- | TODO This isn't a great datastructure to be using. Given there aren't many
 --   http headers the performance is less of an issue but users having to import

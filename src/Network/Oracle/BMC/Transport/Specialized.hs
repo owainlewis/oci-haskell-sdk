@@ -45,10 +45,12 @@ withRequestTarget :: HttpRequest -> HttpRequest
 withRequestTarget request =
     let m = show (Request.httpMethod request)
         p = getRequestPath request
+        -- TODO fixme
         q = ""
         requestTarget = concat [m, " ", p, " ", q]
     in Request.putHeaderIfAbsent request ("(request-target)", C8.pack requestTarget)
 
+withMaybeHost :: HttpRequest -> Maybe HttpRequest
 withMaybeHost request =
   let u = Request.url request in
   do
