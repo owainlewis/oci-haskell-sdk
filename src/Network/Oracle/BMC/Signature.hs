@@ -1,4 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
+-- |
+-- Module      : Network.Oracle.BMC.Signature
+--
+-- Maintainer  : Owain Lewis <owain@owainlewis.com>
+-- Stability   : experimental
+-- Portability : GHC
+--
+--
 module Network.Oracle.BMC.Signature
     ( signWithKey
     , sign

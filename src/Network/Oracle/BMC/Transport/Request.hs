@@ -1,4 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
+-- |
+-- Module      : Network.Oracle.BMC.Transport.Request
+--
+-- Maintainer  : Owain Lewis <owain@owainlewis.com>
+-- Stability   : experimental
+-- Portability : GHC
+--
+-- Implements a thin abstraction of the underlying Network.HTTP.Client module to make
+-- it easier to build and test HTTP requests.
+--
 module Network.Oracle.BMC.Transport.Request
     ( HttpRequest(..)
     , HttpResponse
