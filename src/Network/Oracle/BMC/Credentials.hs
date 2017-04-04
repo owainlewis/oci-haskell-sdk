@@ -83,3 +83,10 @@ loadCredentials = do
             expandedKeyPath <- Path.expand (T.unpack k)
             sshKeyRaw <- TIO.readFile expandedKeyPath
             return . Right $ Credentials u f sshKeyRaw t
+
+-- | Generate the keyId from a set of credentials. A BMCS key takes the form
+--
+-- >> <TENANCY OCID>/<USER OCID>/<KEY FINGERPRINT>
+--
+keyId :: Credentials -> T.Text
+keyId (Credentials u f _ t) = t <> "/" <> u <> "/" <> f

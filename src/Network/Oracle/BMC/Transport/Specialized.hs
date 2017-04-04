@@ -13,6 +13,8 @@ import qualified Data.ByteString.Char8                as C8
 
 import qualified Data.Monoid                          as Monoid
 
+import           Network.Oracle.BMC.Credentials       (Credentials (..))
+
 import           Data.Time                            (defaultTimeLocale,
                                                        formatTime, getZonedTime)
 
@@ -36,13 +38,13 @@ getRequestPath request = fromMaybe Monoid.mempty maybePath
 
 -- Adds the date header to a request
 --
-withDate :: HttpRequest -> IO HttpRequest
-withDate request = do
+withDateHeader :: HttpRequest -> IO HttpRequest
+withDateHeader request = do
     now <- C8.pack <$> getNow
     return $ Request.putHeaderIfAbsent request ("date", now)
 
-withRequestTarget :: HttpRequest -> HttpRequest
-withRequestTarget request =
+withRequestTargetHeader :: HttpRequest -> HttpRequest
+withRequestTargetHeader request =
     let m = show (Request.httpMethod request)
         p = getRequestPath request
         -- TODO fixme
@@ -50,18 +52,30 @@ withRequestTarget request =
         requestTarget = concat [m, " ", p, " ", q]
     in Request.putHeaderIfAbsent request ("(request-target)", C8.pack requestTarget)
 
-withMaybeHost :: HttpRequest -> Maybe HttpRequest
-withMaybeHost request =
-  let u = Request.url request in
-  do
-    uri <- URI.parseURI (Request.url request)
-    authority <- URI.uriAuthority uri
-    let host = URI.uriRegName authority
-    return $ Request.putHeaderIfAbsent request ("host", C8.pack host)
+withHostHeader :: HttpRequest -> HttpRequest
+withHostHeader request = fromMaybe request (withMaybeHost request)
+    where withMaybeHost request = let u = Request.url request in
+            do
+              uri <- URI.parseURI (Request.url request)
+              authority <- URI.uriAuthority uri
+              let host = URI.uriRegName authority
+              return $ Request.putHeaderIfAbsent request ("host", C8.pack host)
 
-withHost :: HttpRequest -> HttpRequest
-withHost request = fromMaybe request (withMaybeHost request)
+withAuthHeader request = request
 
 addMissingHeaders :: HttpRequest -> IO HttpRequest
 addMissingHeaders request = do
-    withDate request >>= pure . withRequestTarget
+    withDateHeader request >>= pure . withRequestTargetHeader
+
+sampleRequest =
+    Request.get "https://iaas.us-phoenix-1.oraclecloud.com/20160918/instances" []
+
+
+-- 1. Create the signing string, which is based on parts of the request.
+
+createSigningString request = request
+
+-- 2. Create the signature from the signing string, using your private key and the RSA-SHA256 algorithm.
+
+-- 3. Add the resulting signature and other required information to the Authorization header in the request.
+
