@@ -19,12 +19,12 @@ endpoint = base ++ "/" ++ version
 
 --------------------------------------------------------
 
-listInstances :: BS.ByteString -> IO HttpResponse
-listInstances compartmentId =
+list :: BS.ByteString -> HttpRequest
+list compartmentId =
     let req = HttpRequest { httpMethod = GET
                           , url = endpoint ++ "/instances"
                           , headers = []
                           , body = Nothing
                           , query = Just [("compartmentId", compartmentId)]
                           } in
-    runHttpsRequest req
+    req

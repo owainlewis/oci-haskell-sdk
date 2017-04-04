@@ -18,6 +18,8 @@ import           Network.Oracle.BMC.Credentials       (Credentials (..))
 import           Data.Time                            (defaultTimeLocale,
                                                        formatTime, getZonedTime)
 
+import qualified Network.Oracle.BMC.Core.Instance     as Instance
+
 getNow :: IO String
 getNow = formatTime defaultTimeLocale tf <$> getZonedTime
     where tf = "%a, %d %b %Y %H:%M:%S %Z"
@@ -41,7 +43,7 @@ getRequestPath request = fromMaybe Monoid.mempty maybePath
 withDateHeader :: HttpRequest -> IO HttpRequest
 withDateHeader request = do
     now <- C8.pack <$> getNow
-    return $ Request.putHeaderIfAbsent request ("date", now)
+    return $ Request.putHeader request ("date", now)
 
 withRequestTargetHeader :: HttpRequest -> HttpRequest
 withRequestTargetHeader request =
@@ -50,7 +52,7 @@ withRequestTargetHeader request =
         -- TODO fixme
         q = ""
         requestTarget = concat [m, " ", p, " ", q]
-    in Request.putHeaderIfAbsent request ("(request-target)", C8.pack requestTarget)
+    in Request.putHeader request ("(request-target)", C8.pack requestTarget)
 
 withHostHeader :: HttpRequest -> HttpRequest
 withHostHeader request = fromMaybe request (withMaybeHost request)
@@ -59,16 +61,20 @@ withHostHeader request = fromMaybe request (withMaybeHost request)
               uri <- URI.parseURI (Request.url request)
               authority <- URI.uriAuthority uri
               let host = URI.uriRegName authority
-              return $ Request.putHeaderIfAbsent request ("host", C8.pack host)
+              return $ Request.putHeader request ("host", C8.pack host)
 
 withAuthHeader request = request
 
+withJsonHeader request = Request.putHeader request ("content-type", "application/json")
+
 addMissingHeaders :: HttpRequest -> IO HttpRequest
 addMissingHeaders request = do
-    withDateHeader request >>= pure . withRequestTargetHeader
+    withDateHeader request >>=
+      pure . withRequestTargetHeader >>=
+      pure . withHostHeader
 
-sampleRequest =
-    Request.get "https://iaas.us-phoenix-1.oraclecloud.com/20160918/instances" []
+sampleRequest = Instance.list compartment
+   where compartment = "ocid1.compartment.oc1..aaaaaaaa3um2atybwhder4qttfhgon4j3hcxgmsvnyvx4flfjyewkkwfzwnq"
 
 
 -- 1. Create the signing string, which is based on parts of the request.

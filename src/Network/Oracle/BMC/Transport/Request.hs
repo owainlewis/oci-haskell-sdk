@@ -49,7 +49,6 @@ data HttpRequest = HttpRequest { httpMethod :: HttpMethod
 
 type HttpResponse = Network.HTTP.Client.Response LBS.ByteString
 
-
 -- | Request contsruction
 -------------------------------------------------------------------------------
 
