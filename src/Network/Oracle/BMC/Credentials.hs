@@ -12,29 +12,37 @@
 module Network.Oracle.BMC.Credentials
     ( Credentials(..)
     , BMCCredentials(..)
-    , fromFile
-    , loadDefaultBMCCredentials
     , parseBMCCredentials
-    , loadCredentials
+    , configFileCredentialsProvider
     ) where
 
 import qualified Data.Text           as T
 import qualified Data.Text.IO        as TIO
 
 import           Control.Applicative ((<$>))
+import           Control.Exception
 import           Data.Ini            (Ini, lookupValue, parseIni)
 import           Data.Semigroup      ((<>))
 import           System.Environment  (getEnv)
-import           Control.Exception
 
-import qualified Network.Oracle.BMC.Path as Path
+import           System.Directory    (getHomeDirectory)
 
 type CredentialError = String
+
+-- | Expands a shorthand path expression i.e ~/Workspace will be expanded
+--   to an absolute path including the users home directory
+--
+expandPath :: FilePath -> IO FilePath
+expandPath p = do
+    home <- getHomeDirectory
+    return $ case p of
+      ('~' : t) -> home ++ t
+      _         -> p
 
 -- | The default location for Oracle BMC credentials
 --
 defaultLocation :: IO FilePath
-defaultLocation = Path.expand "~/.oraclebmc/config"
+defaultLocation = expandPath "~/.oraclebmc/config"
 
 data BMCCredentials = BMCCredentials {
     bmcUser        :: T.Text
@@ -61,26 +69,23 @@ parseBMCCredentials key ini = do
     let credentials = BMCCredentials user fingerprint keyFile tenancy
     return credentials
 
-fromFile :: FilePath -> IO (Either CredentialError BMCCredentials)
-fromFile path = do
+configFileBMCSCredentialsProvider :: FilePath -> T.Text -> IO (Either String BMCCredentials)
+configFileBMCSCredentialsProvider path key = do
     contents <- TIO.readFile path
-    return $ (parseIni contents) >>= (parseBMCCredentials "DEFAULT")
-
-loadDefaultBMCCredentials :: IO (Either CredentialError BMCCredentials)
-loadDefaultBMCCredentials = fromFile =<< defaultLocation
+    return $ (parseIni contents) >>= (parseBMCCredentials key)
 
 -- Load credentials including private SSH key raw
 --
 -- This provides everything needed to authenticate a user
 --
-loadCredentials :: IO (Either CredentialError Credentials)
-loadCredentials = do
-    creds <- loadDefaultBMCCredentials
+configFileCredentialsProvider :: FilePath -> T.Text -> IO (Either String Credentials)
+configFileCredentialsProvider path key = do
+    creds <- configFileBMCSCredentialsProvider path key
     case creds of
         Left e -> return (Left e)
         Right (BMCCredentials u f k t) -> do
             -- TODO (OL) Catch the IO exception and pass to Left
-            expandedKeyPath <- Path.expand (T.unpack k)
+            expandedKeyPath <- expandPath (T.unpack k)
             sshKeyRaw <- TIO.readFile expandedKeyPath
             return . Right $ Credentials u f sshKeyRaw t
 
