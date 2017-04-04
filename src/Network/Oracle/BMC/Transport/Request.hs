@@ -59,23 +59,6 @@ data HttpRequest = HttpRequest { httpMethod :: HttpMethod
 
 type HttpResponse = Network.HTTP.Client.Response LBS.ByteString
 
--- | Request contsruction
--------------------------------------------------------------------------------
-
--- | Construct a HTTP GET request
---
---   You can also set the query string using a list of (k,v) tuples
---
--- > λ> (get "https://github.com" []) { query = Just [("foo", "bar")] }
---
--- > HttpRequest {
---     httpMethod = GET
---   , url = "https://github.com"
---   , headers = []
---   , body = Nothing
---   , query = Nothing
---   }
---
 get :: URL -> [Header] -> HttpRequest
 get url headers = HttpRequest GET url headers Nothing Nothing
 
