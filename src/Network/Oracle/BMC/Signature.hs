@@ -44,6 +44,8 @@ sign keyPath input = (flip signWithKey input) <$> loadPrivateKey keyPath
 signWithKey :: PrivateKey -> BS.ByteString -> Either RSA.RSAError BS.ByteString
 signWithKey key input = bimap id (C.toStrict) (RSA.sign key (C.fromStrict input))
 
+-- | Sign a byte string with a private key, the path to which is provided as input
+--
 signBase64 :: FilePath -> BS.ByteString -> IO (Either RSA.RSAError BS.ByteString)
 signBase64 keyPath input = do
     signature <- sign keyPath input

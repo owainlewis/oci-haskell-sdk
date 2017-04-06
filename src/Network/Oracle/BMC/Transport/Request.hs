@@ -3,6 +3,7 @@ module Network.Oracle.BMC.Transport.Request
     ( addGenericHeaders
     ) where
 
+import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as C8
 import           Data.Char             (toLower)
 import           Data.Semigroup        ((<>))
@@ -10,6 +11,13 @@ import           Data.Time             (defaultTimeLocale, formatTime,
                                         getZonedTime)
 import           Network.HTTP.Client   (Request (..))
 import           Network.HTTP.Simple
+
+import Data.Semigroup(Semigroup)
+import Data.String(IsString)
+
+import qualified Network.Oracle.BMC.Signature as Signature
+
+import Data.CaseInsensitive(original)
 
 addDateHeader :: Request -> IO Request
 addDateHeader request = do
@@ -34,6 +42,24 @@ addGenericHeaders request =
     pure . addRequestTargetHeader >>=
     pure . addHostHeader
 
+-----------------------------------------------------------------------------------
+
+headers request = BS.intercalate " " $ map (\(k,_) -> original k) (requestHeaders request)
+
+tupleConcat :: (Semigroup a, IsString a) => (a, a) -> a
+tupleConcat (k,v) = k <> "=" <> v
+
+computeSignature :: Request -> BS.ByteString
+computeSignature request = BS.intercalate "\n" hdrs
+    where hdrs = map (\(k,v) -> original k <> ": " <> v) (requestHeaders request)
+
+-- | TODO why is this not resolving relative path ?
+--
+base64EncodedRequestSignature request =
+    Signature.signBase64 "/home/owainlewis/.oraclebmc/bmcs_api_key.pem"
+    (computeSignature request)
+-----------------------------------------------------------------------------------
+
 -- | Form the authentication signature header
 --
 addAuthHeader request =
@@ -50,5 +76,7 @@ listInstances compartmentId =
     defaultRequest
 
 example = listInstances "ocid.compatment"
+
+exampleHeaders = addGenericHeaders example
 
 ----------------------------------------------------------------------
