@@ -69,7 +69,9 @@ parseBMCCredentials key ini = do
     let credentials = BMCCredentials user fingerprint keyFile tenancy
     return credentials
 
-configFileBMCSCredentialsProvider :: FilePath -> T.Text -> IO (Either String BMCCredentials)
+configFileBMCSCredentialsProvider :: FilePath ->
+                                     T.Text ->
+                                     IO (Either String BMCCredentials)
 configFileBMCSCredentialsProvider path key = do
     contents <- TIO.readFile path
     return $ (parseIni contents) >>= (parseBMCCredentials key)
@@ -78,7 +80,9 @@ configFileBMCSCredentialsProvider path key = do
 --
 -- This provides everything needed to authenticate a user
 --
-configFileCredentialsProvider :: FilePath -> T.Text -> IO (Either String Credentials)
+configFileCredentialsProvider :: FilePath ->
+                                 T.Text ->
+                                 IO (Either String Credentials)
 configFileCredentialsProvider path key = do
     creds <- configFileBMCSCredentialsProvider path key
     case creds of

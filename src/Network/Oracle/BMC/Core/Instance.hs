@@ -1,30 +1,23 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Network.Oracle.BMC.Core.Instance where
 
+import           Network.HTTP.Simple
 import           Network.Oracle.BMC.Transport.Request
 
-import qualified Data.ByteString                      as BS
-import qualified Data.ByteString.Char8                as C
+import Data.ByteString.Char8
 
---------------------------------------------------------
+import Data.Semigroup((<>), Semigroup)
+import Data.String(IsString)
 
 base :: String
 base = "https://iaas.us-phoenix-1.oraclecloud.com"
 
-version :: String
-version = "20160918"
+versionedPath :: (Semigroup a, IsString a) => a -> a
+versionedPath path = "20160918" <> path
 
-endpoint :: String
-endpoint = base ++ "/" ++ version
+listInstances compartmentId =
+    setRequestHost "https://iaas.us-phoenix-1.oraclecloud.com" $
+    setRequestPath "/instances" $
+    setRequestQueryString [("compartmentId", Just compartmentId)]
+    defaultRequest
 
---------------------------------------------------------
-
-list :: BS.ByteString -> HttpRequest
-list compartmentId =
-    let req = HttpRequest { httpMethod = GET
-                          , url = endpoint ++ "/instances"
-                          , headers = []
-                          , body = Nothing
-                          , query = Just [("compartmentId", compartmentId)]
-                          } in
-    req

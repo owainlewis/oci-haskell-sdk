@@ -1,115 +1,54 @@
 {-# LANGUAGE OverloadedStrings #-}
--- |
--- Module      : Network.Oracle.BMC.Transport.Request
---
--- Maintainer  : Owain Lewis <owain@owainlewis.com>
--- Stability   : experimental
--- Portability : GHC
---
--- Implements a thin abstraction of the underlying Network.HTTP.Client module to make
--- it easier to build and test HTTP requests.
---
 module Network.Oracle.BMC.Transport.Request
-    ( HttpRequest(..)
-    , HttpResponse
-    , HttpMethod(..)
-    , URL
-    , Header
-    , runHttpsRequest
-    , putHeader
-    , putHeaderIfAbsent
-    , get
-    , post
-    , put
-    , delete
+    ( addGenericHeaders
     ) where
 
-import           Network.HTTP.Client
-import           Network.HTTP.Client.TLS
-import           Network.HTTP.Types.Status (statusCode)
+import qualified Data.ByteString.Char8 as C8
+import           Data.Char             (toLower)
+import           Data.Semigroup        ((<>))
+import           Data.Time             (defaultTimeLocale, formatTime,
+                                        getZonedTime)
+import           Network.HTTP.Client   (Request (..))
+import           Network.HTTP.Simple
 
-import qualified Data.ByteString           as BS
-import qualified Data.ByteString.Char8     as C8
-import qualified Data.ByteString.Lazy      as LBS
-import qualified Data.CaseInsensitive      as CI
+addDateHeader :: Request -> IO Request
+addDateHeader request = do
+    now <- C8.pack <$> formatTime defaultTimeLocale tf <$> getZonedTime
+    return $ setRequestHeader "date" [now] request
+    where tf = "%a, %d %b %Y %H:%M:%S %Z"
 
-import Data.Set as Set hiding ( delete )
+addRequestTargetHeader :: Request -> Request
+addRequestTargetHeader request =
+    setRequestHeader "(request-target)" [target] request
+    where
+      rMethod = lowerCaseBS (method request)
+      lowerCaseBS = C8.pack . map toLower . C8.unpack
+      target = rMethod <> " " <> (path request) <> (queryString request)
 
--- | Types
--------------------------------------------------------------------------------
+addHostHeader :: Request -> Request
+addHostHeader request = setRequestHeader "host" [(host request)] request
 
-type URL     = String
+addGenericHeaders :: Request -> IO Request
+addGenericHeaders request =
+    addDateHeader request >>=
+    pure . addRequestTargetHeader >>=
+    pure . addHostHeader
 
-type Header  = (BS.ByteString, BS.ByteString)
-
-data HttpMethod = GET
-                | POST
-                | PUT
-                | DELETE
-                | PATCH
-                | HEAD
-                deriving ( Eq, Read, Show )
-
-data HttpRequest = HttpRequest { httpMethod :: HttpMethod
-                               , url :: String
-                               , headers :: [Header]
-                               , body :: Maybe BS.ByteString
-                               , query :: Maybe [(BS.ByteString, BS.ByteString)]
-                               } deriving ( Eq, Read, Show )
-
-type HttpResponse = Network.HTTP.Client.Response LBS.ByteString
-
-get :: URL -> [Header] -> HttpRequest
-get url headers = HttpRequest GET url headers Nothing Nothing
-
-post :: URL -> [Header] -> Maybe BS.ByteString -> HttpRequest
-post url headers body = HttpRequest POST url headers body Nothing
-
-put :: URL -> [Header] -> Maybe BS.ByteString -> HttpRequest
-put url headers body = HttpRequest PUT url headers body Nothing
-
-delete :: URL -> [Header] -> HttpRequest
-delete url headers = HttpRequest DELETE url headers Nothing Nothing
-
--------------------------------------------------------------------------------
-
--- | TODO This isn't a great datastructure to be using. Given there aren't many
---   http headers the performance is less of an issue but users having to import
---   containers as a library was the main concern
+-- | Form the authentication signature header
 --
-putHeader :: HttpRequest -> Header -> HttpRequest
-putHeader request header =
-    request { headers = header : (headers request) }
+addAuthHeader request =
+    let rqHeaders = requestHeaders request in
+      rqHeaders
+-- addAuthHeader <$> addGenericHeaders example
 
-putHeaderIfAbsent :: HttpRequest -> Header -> HttpRequest
-putHeaderIfAbsent request header =
-    if headerExists (headers request) header then putHeader request header
-                                             else request
-      where headerExists [] h = False
-            headerExists (x:xs) h =
-                if x == h then True else headerExists xs h
+----------------------------------------------------------------------
 
--- | Request / Response
--------------------------------------------------------------------------------
+listInstances compartmentId =
+    setRequestHost "https://iaas.us-phoenix-1.oraclecloud.com" $
+    setRequestPath "/20160918/instances" $
+    setRequestQueryString [("compartmentId", Just compartmentId)]
+    defaultRequest
 
-transformRequest :: HttpRequest -> IO Network.HTTP.Client.Request
-transformRequest request =
-      let secondJust = (\(k, v) -> (k, Just v)) in
-        do
-            manager <- newManager tlsManagerSettings
-            initialRequest <- parseRequest (url request)
-            let initReq = initialRequest
-                              { method = C8.pack (show . httpMethod $ request)
-                              , requestHeaders = Prelude.map (\(k, v) -> (CI.mk k, v)) (headers request)
-                              }
-                req = maybe initReq (\qs -> setQueryString (secondJust <$> qs) initReq) (query request)
-            return $ maybe req (\lbs -> req { requestBody = RequestBodyBS lbs }) (body request)
+example = listInstances "ocid.compatment"
 
--- | TODO pass options (i.e proxy stuff) into here
-
-runHttpsRequest :: HttpRequest -> IO HttpResponse
-runHttpsRequest req = do
-    manager <- newManager tlsManagerSettings
-    internalRequest <- transformRequest req
-    response <- httpLbs internalRequest manager
-    return response
+----------------------------------------------------------------------
