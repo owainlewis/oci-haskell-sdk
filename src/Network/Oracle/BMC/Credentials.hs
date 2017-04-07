@@ -14,10 +14,12 @@ module Network.Oracle.BMC.Credentials
     , BMCCredentials(..)
     , parseBMCCredentials
     , configFileCredentialsProvider
+    , keyId
     ) where
 
 import qualified Data.Text           as T
 import qualified Data.Text.IO        as TIO
+import qualified Data.Text.Encoding as Encoding
 
 import           Control.Applicative ((<$>))
 import           Control.Exception
@@ -26,6 +28,8 @@ import           Data.Semigroup      ((<>))
 import           System.Environment  (getEnv)
 
 import           System.Directory    (getHomeDirectory)
+
+import qualified Data.ByteString as BS
 
 type CredentialError = String
 
@@ -66,8 +70,7 @@ parseBMCCredentials key ini = do
     fingerprint <- lookupValue key "fingerprint" ini
     keyFile <- lookupValue key "key_file" ini
     tenancy <- lookupValue key "tenancy" ini
-    let credentials = BMCCredentials user fingerprint keyFile tenancy
-    return credentials
+    return $ BMCCredentials user fingerprint keyFile tenancy
 
 configFileBMCSCredentialsProvider :: FilePath ->
                                      T.Text ->
@@ -97,5 +100,5 @@ configFileCredentialsProvider path key = do
 --
 -- >> <TENANCY OCID>/<USER OCID>/<KEY FINGERPRINT>
 --
-keyId :: Credentials -> T.Text
-keyId (Credentials u f _ t) = t <> "/" <> u <> "/" <> f
+keyId :: Credentials -> BS.ByteString
+keyId (Credentials u f _ t) = Encoding.encodeUtf8 $ t <> "/" <> u <> "/" <> f

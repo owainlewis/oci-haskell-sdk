@@ -6,9 +6,10 @@ This library provides a Haskell interface for working with the Oracle Bare Metal
 
 ## TODO
 
-1. CI/CD builds
-2. Cleanup the signature stuff
-3. Docs
+* CI/CD builds
+* Cleanup the signature stuff
+*  Docs
+* Reconcile types. Using a mish mash of text and bs etc
 
 ## Misc
 
