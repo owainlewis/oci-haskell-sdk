@@ -14,12 +14,15 @@ module Network.Oracle.BMC.Credentials
     , BMCCredentials(..)
     , parseBMCCredentials
     , configFileCredentialsProvider
+    , defaultCredentialsProvider
     , keyId
     ) where
 
 import qualified Data.Text           as T
 import qualified Data.Text.IO        as TIO
 import qualified Data.Text.Encoding as Encoding
+
+import qualified Network.Oracle.BMC.Util as Util
 
 import           Control.Applicative ((<$>))
 import           Control.Exception
@@ -87,7 +90,8 @@ configFileCredentialsProvider :: FilePath ->
                                  T.Text ->
                                  IO (Either String Credentials)
 configFileCredentialsProvider path key = do
-    creds <- configFileBMCSCredentialsProvider path key
+    expandedPath <- expandPath path
+    creds <- configFileBMCSCredentialsProvider expandedPath key
     case creds of
         Left e -> return (Left e)
         Right (BMCCredentials u f k t) -> do
@@ -95,6 +99,9 @@ configFileCredentialsProvider path key = do
             expandedKeyPath <- expandPath (T.unpack k)
             sshKeyRaw <- TIO.readFile expandedKeyPath
             return . Right $ Credentials u f sshKeyRaw t
+
+defaultCredentialsProvider :: IO Credentials
+defaultCredentialsProvider = Util.throwLeftIO $ configFileCredentialsProvider "~/.oraclebmc/config" "DEFAULT"
 
 -- | Generate the keyId from a set of credentials. A BMCS key takes the form
 --
