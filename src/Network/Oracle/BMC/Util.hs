@@ -1,10 +1,12 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+
 module Network.Oracle.BMC.Util where
 
 import Control.Exception
 import Data.Typeable
 
-data OracleBMCException = GenericException String
+data OracleBMCException =
+  GenericException String
   deriving (Typeable)
 
 instance Show OracleBMCException where
@@ -13,7 +15,9 @@ instance Show OracleBMCException where
 instance Exception OracleBMCException
 
 -- | Convert Either errors into impure IO errors
-throwLeftIO :: Show e => IO (Either e b) -> IO b
+throwLeftIO
+  :: Show e
+  => IO (Either e b) -> IO b
 throwLeftIO ioe = do
   result <- ioe
   case result of

@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 module Network.Oracle.BMC.Transport.Request
   ( addGenericHeaders
   ) where
