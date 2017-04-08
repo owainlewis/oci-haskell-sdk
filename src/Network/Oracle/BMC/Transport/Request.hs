@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-
 module Network.Oracle.BMC.Transport.Request
   ( addGenericHeaders
   ) where
@@ -99,12 +98,12 @@ mkBaseRequest =
   setRequestSecure True $ setRequestPort 443 $ defaultRequest
 
 ----------------------------------------------------------------------
+listInstances :: BS.ByteString -> Request
 listInstances compartmentId =
   setRequestPath "/20160918/instances" $
   setRequestQueryString [("compartmentId", Just compartmentId)] mkBaseRequest
 
-requestExample = listInstances "ocid.123"
-
-test = do
+testRequest = do
   credentials <- Credentials.defaultCredentialsProvider
-  return $ transformRequest credentials requestExample
+  req <- transformRequest credentials (listInstances "ocid.123")
+  return $ req
