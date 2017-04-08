@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Network.Oracle.BMC.Credentials
@@ -10,27 +11,27 @@
 --
 -----------------------------------------------------------------------------
 module Network.Oracle.BMC.Credentials
-    ( Credentials(..)
-    , BMCCredentials(..)
-    , parseBMCCredentials
-    , configFileCredentialsProvider
-    , defaultCredentialsProvider
-    , keyId
-    ) where
+  ( Credentials(..)
+  , BMCCredentials(..)
+  , parseBMCCredentials
+  , configFileCredentialsProvider
+  , defaultCredentialsProvider
+  , keyId
+  ) where
 
-import qualified Data.Text           as T
-import qualified Data.Text.IO        as TIO
+import qualified Data.Text as T
 import qualified Data.Text.Encoding as Encoding
+import qualified Data.Text.IO as TIO
 
 import qualified Network.Oracle.BMC.Util as Util
 
-import           Control.Applicative ((<$>))
-import           Control.Exception
-import           Data.Ini            (Ini, lookupValue, parseIni)
-import           Data.Semigroup      ((<>))
-import           System.Environment  (getEnv)
+import Control.Applicative ((<$>))
+import Control.Exception
+import Data.Ini (Ini, lookupValue, parseIni)
+import Data.Semigroup ((<>))
+import System.Environment (getEnv)
 
-import           System.Directory    (getHomeDirectory)
+import System.Directory (getHomeDirectory)
 
 import qualified Data.ByteString as BS
 
@@ -41,67 +42,71 @@ type CredentialError = String
 --
 expandPath :: FilePath -> IO FilePath
 expandPath p = do
-    home <- getHomeDirectory
-    return $ case p of
-      ('~' : t) -> home ++ t
-      _         -> p
+  home <- getHomeDirectory
+  return $
+    case p of
+      ('~':t) -> home ++ t
+      _ -> p
 
 -- | The default location for Oracle BMC credentials
 --
 defaultLocation :: IO FilePath
 defaultLocation = expandPath "~/.oraclebmc/config"
 
-data BMCCredentials = BMCCredentials {
-    bmcUser        :: T.Text
+data BMCCredentials = BMCCredentials
+  { bmcUser :: T.Text
   , bmcFingerprint :: T.Text
-  , bmcKeyFile     :: T.Text
-  , bmcTenancy     :: T.Text
-} deriving ( Eq, Read, Show )
+  , bmcKeyFile :: T.Text
+  , bmcTenancy :: T.Text
+  } deriving (Eq, Read, Show)
 
-data Credentials = Credentials {
-    user        :: T.Text  -- User OCID
-  , fingerprint :: T.Text  -- Fingerprint of private SSH key
-  , key         :: T.Text  -- Raw private SSH key contents
-  , tenancy     :: T.Text  -- Tenancy OCID
-} deriving ( Eq, Read, Show )
+data Credentials = Credentials
+  { user :: T.Text -- User OCID
+  , fingerprint :: T.Text -- Fingerprint of private SSH key
+  , key :: T.Text -- Raw private SSH key contents
+  , tenancy :: T.Text -- Tenancy OCID
+  } deriving (Eq, Read, Show)
 
 -- | Extract a credentials object
 --
 parseBMCCredentials :: T.Text -> Ini -> Either CredentialError BMCCredentials
 parseBMCCredentials key ini = do
-    user <- lookupValue key "user" ini
-    fingerprint <- lookupValue key "fingerprint" ini
-    keyFile <- lookupValue key "key_file" ini
-    tenancy <- lookupValue key "tenancy" ini
-    return $ BMCCredentials user fingerprint keyFile tenancy
+  user <- lookupValue key "user" ini
+  fingerprint <- lookupValue key "fingerprint" ini
+  keyFile <- lookupValue key "key_file" ini
+  tenancy <- lookupValue key "tenancy" ini
+  return $ BMCCredentials user fingerprint keyFile tenancy
 
-configFileBMCSCredentialsProvider :: FilePath ->
-                                     T.Text ->
-                                     IO (Either String BMCCredentials)
+configFileBMCSCredentialsProvider :: FilePath
+                                  -> T.Text
+                                  -> IO (Either String BMCCredentials)
 configFileBMCSCredentialsProvider path key = do
-    contents <- TIO.readFile path
-    return $ (parseIni contents) >>= (parseBMCCredentials key)
+  contents <- TIO.readFile path
+  return $ (parseIni contents) >>= (parseBMCCredentials key)
 
 -- Load credentials including private SSH key raw
 --
 -- This provides everything needed to authenticate a user
 --
-configFileCredentialsProvider :: FilePath ->
-                                 T.Text ->
-                                 IO (Either String Credentials)
+configFileCredentialsProvider :: FilePath
+                              -> T.Text
+                              -> IO (Either String Credentials)
 configFileCredentialsProvider path key = do
-    expandedPath <- expandPath path
-    creds <- configFileBMCSCredentialsProvider expandedPath key
-    case creds of
-        Left e -> return (Left e)
-        Right (BMCCredentials u f k t) -> do
+  expandedPath <- expandPath path
+  creds <- configFileBMCSCredentialsProvider expandedPath key
+  case creds of
+    Left e -> return (Left e)
+    Right (BMCCredentials u f k t)
             -- TODO (OL) Catch the IO exception and pass to Left
-            expandedKeyPath <- expandPath (T.unpack k)
-            sshKeyRaw <- TIO.readFile expandedKeyPath
-            return . Right $ Credentials u f sshKeyRaw t
+     -> do
+      expandedKeyPath <- expandPath (T.unpack k)
+      sshKeyRaw <- TIO.readFile expandedKeyPath
+      return . Right $ Credentials u f sshKeyRaw t
 
 defaultCredentialsProvider :: IO Credentials
-defaultCredentialsProvider = Util.throwLeftIO $ configFileCredentialsProvider "~/.oraclebmc/config" "DEFAULT"
+defaultCredentialsProvider =
+  Util.throwLeftIO $
+  configFileCredentialsProvider "~/.oraclebmc/config" "DEFAULT"
 
 -- | Generate the keyId from a set of credentials. A BMCS key takes the form
 --
