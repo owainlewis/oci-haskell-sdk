@@ -104,7 +104,18 @@ listInstances compartmentId =
   setRequestPath "/20160918/instances" $
   setRequestQueryString [("compartmentId", Just compartmentId)] mkBaseRequest
 
+binRequest compartmentId =
+     setRequestHost "requestb.in" $
+     setRequestPath "/1bu6x1u1" $
+     setRequestQueryString [("compartmentId", Just compartmentId)] $
+     defaultRequest
+
+testing = do
+  credentials <- Credentials.defaultCredentialsProvider
+  req <- transformRequest credentials (binRequest "")
+  return req
+
 testRequest = do
   credentials <- Credentials.defaultCredentialsProvider
-  req <- transformRequest credentials (listInstances "ocid.123")
-  return $ req
+  req <- transformRequest credentials (listInstances "ocid1.compartment.oc1..aaaaaaaa3um2atybwhder4qttfhgon4j3hcxgmsvnyvx4flfjyewkkwfzwnq")
+  return req
