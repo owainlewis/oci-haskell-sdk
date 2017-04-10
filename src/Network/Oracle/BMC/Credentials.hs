@@ -23,7 +23,7 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as Encoding
 import qualified Data.Text.IO as TIO
 
-import qualified Network.Oracle.BMC.Util as Util
+import qualified Network.Oracle.BMC.Exception as Exception
 
 import Control.Applicative ((<$>))
 import Control.Exception
@@ -103,9 +103,12 @@ configFileCredentialsProvider path key = do
       sshKeyRaw <- TIO.readFile expandedKeyPath
       return . Right $ Credentials u f sshKeyRaw t
 
+-- | Handler for the most common case where credentials are stored in the default location
+--   with the default profile
+--
 defaultCredentialsProvider :: IO Credentials
 defaultCredentialsProvider =
-  Util.throwLeftIO $
+  Exception.throwLeftIO $
   configFileCredentialsProvider "~/.oraclebmc/config" "DEFAULT"
 
 -- | Generate the keyId from a set of credentials. A BMCS key takes the form

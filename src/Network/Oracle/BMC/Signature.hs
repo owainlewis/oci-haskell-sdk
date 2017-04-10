@@ -55,6 +55,7 @@ signBase64 :: FilePath
            -> IO (Either RSA.RSAError BS.ByteString)
 signBase64 keyPath input = do
   signature <- sign keyPath input
+  print signature
   let base64EncodedSignature = bimap (id) (B64.encode) signature
   return base64EncodedSignature
 
