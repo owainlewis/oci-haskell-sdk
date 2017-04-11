@@ -1,7 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Network.Oracle.BMC.Transport.Request
+-- License     :  BSD-style (see the file LICENSE)
+--
+-- Maintainer  :  Owain Lewis <owain@owainlewis.com>
+--
+-- Add appropriate authentication information to a HTTP request based on
+-- https://tools.ietf.org/html/draft-cavage-http-signatures-05
+--
+-----------------------------------------------------------------------------
 module Network.Oracle.BMC.Transport.Request
-  ( addGenericHeaders
+  ( transform
   ) where
 
 import qualified Data.ByteString as BS
@@ -15,8 +26,6 @@ import Network.HTTP.Simple
 import qualified Network.Oracle.BMC.Credentials as Credentials
 import qualified Network.Oracle.BMC.Signature as Signature
 
-import Control.Monad (forM_)
-
 --------------------------------------------------------------------------------
 -- Add HTTP headers
 --
@@ -25,8 +34,8 @@ import Control.Monad (forM_)
 --------------------------------------------------------------------------------
 type HeaderTransformer = Request -> IO Request
 
-genericHeaders = ["date", "(request-target)", "host"]
-
+-- Add a HTTP date header. It appears this has to be in GMT
+--
 addDateHeader :: HeaderTransformer
 addDateHeader request = do
   now <-
@@ -53,7 +62,8 @@ addContentTypeDefault request =
 -- | TODO dispatch on HTTP method adding additional headers if needed
 addGenericHeaders :: Request -> IO Request
 addGenericHeaders request =
-  addDateHeader request >>= addRequestTargetHeader >>= addHostHeader
+  addDateHeader request >>= addRequestTargetHeader >>= addHostHeader >>=
+  addContentTypeDefault
 
 --------------------------------------------------------------------------------
 computeSignature :: Request -> BS.ByteString
@@ -64,9 +74,9 @@ computeSignature request = BS.intercalate "\n" hdrs
 base64EncodedRequestSignature :: Request -> IO BS.ByteString
 base64EncodedRequestSignature request = do
   let signature = computeSignature request
-  print signature
   Signature.signBase64Unsafe
-    "/home/owainlewis/.oraclebmc/bmcs_api_key.pem" signature
+    "/home/owainlewis/.oraclebmc/bmcs_api_key.pem"
+    signature
 
 zipHeaderPairs :: [(BS.ByteString, BS.ByteString)] -> BS.ByteString
 zipHeaderPairs pairs = BS.intercalate "," $ map f pairs
@@ -79,7 +89,7 @@ zipHeaderPairs pairs = BS.intercalate "," $ map f pairs
 --
 addAuthHeader :: Request -> BS.ByteString -> IO Request
 addAuthHeader request keyId =
-  let headers _ = "date (request-target) host"
+  let headers = (BS.intercalate " ") . map (original . fst) . requestHeaders
   in do signature <- base64EncodedRequestSignature request
         let requestSignature =
               zipHeaderPairs
@@ -95,44 +105,9 @@ addAuthHeader request keyId =
             request
 
 --------------------------------------------------------------------------------
-transformRequest :: Credentials.Credentials -> Request -> IO Request
-transformRequest credentials request =
+-- Take a normal HTTP request and add the appropritate authentication signature
+-- information to it based on credentials provided
+transform :: Credentials.Credentials -> Request -> IO Request
+transform credentials request =
   let keyId = Credentials.keyId credentials
   in addGenericHeaders request >>= (flip addAuthHeader keyId)
-
-----------------------------------------------------------------------
-
-compartment = "ocid1.compartment.oc1..aaaaaaaa3um2atybwhder4qttfhgon4j3hcxgmsvnyvx4flfjyewkkwfzwnq"
-
-listInstances :: BS.ByteString -> Request
-listInstances compartmentId =
-  setRequestHost "iaas.us-phoenix-1.oraclecloud.com" $
-  setRequestSecure True $ setRequestPort 443 $
-  setRequestPath "/20160918/instances" $
-  setRequestQueryString [("compartmentId", Just compartmentId)] $
-  defaultRequest
-
-binRequest compartmentId =
-  setRequestHost "requestb.in" $
-  setRequestPath "/10r0cri1" $
-  setRequestQueryString [("compartmentId", Just compartmentId)] $ defaultRequest
-
-testing = do
-  credentials <- Credentials.defaultCredentialsProvider
-  req <- transformRequest credentials (binRequest compartment)
-  return req
-
-dumpHeaders req =
-  forM_ (requestHeaders req) $ do
-    \(k, v) -> putStrLn $ (show k) ++ ":" ++ (show v)
-
-testRequest = do
-  credentials <- Credentials.defaultCredentialsProvider
-  req <-
-    transformRequest
-      credentials
-      (listInstances
-         "ocid1.compartment.oc1..aaaaaaaa3um2atybwhder4qttfhgon4j3hcxgmsvnyvx4flfjyewkkwfzwnq")
-  return req
-
-main = testRequest >>= httpLbs

@@ -11,10 +11,8 @@ This library provides a Haskell interface for working with the Oracle Bare Metal
 *  Docs
 * Reconcile types. Using a mish mash of text and bs etc
 
-## Misc
+Extract the underlying signature stuff?
 
-```
-sudo apt-get install libssl-dev
-```
+https://tools.ietf.org/html/draft-cavage-http-signatures-05
 
 ## Credentials
