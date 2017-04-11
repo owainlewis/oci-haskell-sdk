@@ -81,6 +81,8 @@ class SignedRequestAuth(requests.auth.AuthBase):
             request.headers, host=host,
             method=request.method, path=request.path_url)
 
+        print(signed_headers)
+
         for k,v in signed_headers.items():
             print("%s : %s" % (k,v))
 
@@ -105,8 +107,8 @@ headers = {
     "date": email.utils.formatdate(usegmt=True)
 }
 
-response = requests.get("http://requestb.in/1bu6x1u1", auth=auth, headers=headers)
-print(base64.base64decode("uC5OGbTzXnunaT2wQImSXou38yIHnPgDTf+3PvIfWBt8X/46vog2SCv2cDspW0QieBPUFdDXe254+bHWTwxjE9IOlWA7EmoYJMiEV6k711ocSgvL3t94Of6G6sVvgftYtsw4gPx5gMxqTbVKEW7txfUfcgerRmHSEElakDNZu+SnN+IN1+OgImS4GfBAd6+arQVVLQxfl4+3vVJOKoWCnjH1xb9EQtEGns9LwDUtR9KgP3cdEZpc9ey/EGLrGpP3z1JnlePkbcmeE7wpA5GO6m9qpJ3l47/cMZ9cesY5PiVXagG9pONNrEDpfezfOWngEdlB0iwTQ+I1G9kWjQcpKw==")
+response = requests.get("http://requestb.in/10r0cri1", auth=auth, headers=headers)
+
 
 # GET with query parameters
 uri = "https://iaas.us-phoenix-1.oraclecloud.com/20160918/instances?compartmentId=ocid1.compartment.oc1..aaaaaaaa3um2atybwhder4qttfhgon4j3hcxgmsvnyvx4flfjyewkkwfzwnq"

@@ -25,6 +25,8 @@ import Control.Monad (forM_)
 --------------------------------------------------------------------------------
 type HeaderTransformer = Request -> IO Request
 
+genericHeaders = ["date", "(request-target)", "host"]
+
 addDateHeader :: HeaderTransformer
 addDateHeader request = do
   now <-
@@ -51,8 +53,7 @@ addContentTypeDefault request =
 -- | TODO dispatch on HTTP method adding additional headers if needed
 addGenericHeaders :: Request -> IO Request
 addGenericHeaders request =
-  addDateHeader request >>= addRequestTargetHeader >>= addHostHeader >>=
-  addContentTypeDefault
+  addDateHeader request >>= addRequestTargetHeader >>= addHostHeader
 
 --------------------------------------------------------------------------------
 computeSignature :: Request -> BS.ByteString
@@ -61,10 +62,11 @@ computeSignature request = BS.intercalate "\n" hdrs
     hdrs = map (\(k, v) -> original k <> ": " <> v) (requestHeaders request)
 
 base64EncodedRequestSignature :: Request -> IO BS.ByteString
-base64EncodedRequestSignature request =
+base64EncodedRequestSignature request = do
+  let signature = computeSignature request
+  print signature
   Signature.signBase64Unsafe
-    "/home/owainlewis/.oraclebmc/bmcs_api_key.pem"
-    (computeSignature request)
+    "/home/owainlewis/.oraclebmc/bmcs_api_key.pem" signature
 
 zipHeaderPairs :: [(BS.ByteString, BS.ByteString)] -> BS.ByteString
 zipHeaderPairs pairs = BS.intercalate "," $ map f pairs
@@ -98,26 +100,26 @@ transformRequest credentials request =
   let keyId = Credentials.keyId credentials
   in addGenericHeaders request >>= (flip addAuthHeader keyId)
 
--- ----------------------------------------------------------------------
-mkBaseRequest :: Request
-mkBaseRequest =
-  setRequestHost "iaas.us-phoenix-1.oraclecloud.com" $
-  setRequestSecure True $ setRequestPort 443 $ defaultRequest
-
 ----------------------------------------------------------------------
+
+compartment = "ocid1.compartment.oc1..aaaaaaaa3um2atybwhder4qttfhgon4j3hcxgmsvnyvx4flfjyewkkwfzwnq"
+
 listInstances :: BS.ByteString -> Request
 listInstances compartmentId =
-  setRequestPath "/20160918/instances" $ mkBaseRequest
+  setRequestHost "iaas.us-phoenix-1.oraclecloud.com" $
+  setRequestSecure True $ setRequestPort 443 $
+  setRequestPath "/20160918/instances" $
+  setRequestQueryString [("compartmentId", Just compartmentId)] $
+  defaultRequest
 
---  setRequestQueryString [("compartmentId", Just compartmentId)] mkBaseRequest
 binRequest compartmentId =
   setRequestHost "requestb.in" $
-  setRequestPath "/1bu6x1u1" $
+  setRequestPath "/10r0cri1" $
   setRequestQueryString [("compartmentId", Just compartmentId)] $ defaultRequest
 
 testing = do
   credentials <- Credentials.defaultCredentialsProvider
-  req <- transformRequest credentials (binRequest "")
+  req <- transformRequest credentials (binRequest compartment)
   return req
 
 dumpHeaders req =
@@ -132,8 +134,5 @@ testRequest = do
       (listInstances
          "ocid1.compartment.oc1..aaaaaaaa3um2atybwhder4qttfhgon4j3hcxgmsvnyvx4flfjyewkkwfzwnq")
   return req
--- Notes
--- Date is in GMT format time
--- Missing content type header
---
--- Signature headers="date (request-target) host",keyId="ocid1.tenancy.oc1..aaaaaaaatyn7scrtwtqedvgrxgr2xunzeo6uanvyhzxqblctwkrpisvke4kq/ocid1.user.oc1..aaaaaaaalazktz3vckflmtybfllqxu6zruovinecyglo7ylz5aqrbf4je4bq/1e:3d:74:34:9c:ae:2b:e9:64:f8:32:80:ce:8e:bf:fe",algorithm="rsa-sha256",signature="XPBQUnPY2Gr04ebnEpkfPcedHO66ODaNzOxmy150EP4knlqdQiGwAOERfZvugMB9KFvij2IPWJCEyZLdu9w1HtAQWiuYRWsky46XecJxmYp0dTLj/3VkNjIpQM8cHMETGybqC6OIhweJCtm2CY8tTJQtILfh0/pNGhEqLvfNN/Op4kNDzTFNYrmNEhxTdotZASbbAadfn0ilJZDTcTJpKK8CN/bnZHktoqA9WCiIcAa4aLQyJi0KpYOmmgNla/W5LjUjiGZzH3YStsfkLOdA0XLFBXb2X8ejAzB3IF5GOzE2n9a5oaLFEE8K6pbdaZvj/A9LfpBQYVRE3Zg2WqepJA=="'
+
+main = testRequest >>= httpLbs
