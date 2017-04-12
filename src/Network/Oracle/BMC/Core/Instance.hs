@@ -10,40 +10,34 @@ import Data.String (IsString)
 
 import qualified Data.ByteString as BS
 
-import qualified Network.Oracle.BMC.Credentials as Credentials
-
-base :: String
-base = "https://iaas.us-phoenix-1.oraclecloud.com"
+import Network.Oracle.BMC.Credentials(Credentials, defaultCredentialsProvider)
 
 versionedPath
   :: (Semigroup a, IsString a)
   => a -> a
-versionedPath path = "20160918" <> path
+versionedPath path = "/20160918" <> path
 
 ----------------------------------------------------------------------
 compartment =
   "ocid1.compartment.oc1..aaaaaaaa3um2atybwhder4qttfhgon4j3hcxgmsvnyvx4flfjyewkkwfzwnq"
 
-listInstances :: BS.ByteString -> Request
-listInstances compartmentId =
+mkBaseRequest :: BS.ByteString -> Request
+mkBaseRequest path =
   setRequestHost "iaas.us-phoenix-1.oraclecloud.com" $
   setRequestSecure True $
   setRequestPort 443 $
-  setRequestPath "/20160918/instances" $
-  setRequestQueryString [("compartmentId", Just compartmentId)] $ defaultRequest
+  setRequestPath (versionedPath path) $
+  defaultRequest
 
-binRequest compartmentId =
-  setRequestHost "requestb.in" $
-  setRequestPath "/10r0cri1" $
-  setRequestQueryString [("compartmentId", Just compartmentId)] $ defaultRequest
+listInstances :: BS.ByteString -> Request
+listInstances compartmentId =
+  setRequestQueryString [("compartmentId", Just compartmentId)] $
+  mkBaseRequest "/instances"
 
-testing = do
-  credentials <- Credentials.defaultCredentialsProvider
-  req <- Request.transform credentials (binRequest compartment)
-  return req
 
-testRequest = do
-  credentials <- Credentials.defaultCredentialsProvider
+listInstancesRequest :: IO Credentials -> IO Request
+listInstancesRequest credentialsProvider = do
+  credentials <- credentialsProvider
   req <-
     Request.transform
       credentials
@@ -51,4 +45,4 @@ testRequest = do
          "ocid1.compartment.oc1..aaaaaaaa3um2atybwhder4qttfhgon4j3hcxgmsvnyvx4flfjyewkkwfzwnq")
   return req
 
-main = testRequest >>= httpLbs
+main = listInstancesRequest defaultCredentialsProvider >>= httpLbs
