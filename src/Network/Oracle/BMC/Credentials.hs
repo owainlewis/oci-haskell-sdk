@@ -12,18 +12,16 @@
 -----------------------------------------------------------------------------
 module Network.Oracle.BMC.Credentials
   ( Credentials(..)
-  , BMCCredentials(..)
-  , parseBMCCredentials
   , configFileCredentialsProvider
   , defaultCredentialsProvider
-  , keyId
+  , getKeyId
   ) where
 
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as Encoding
 import qualified Data.Text.IO as TIO
 
-import qualified Network.Oracle.BMC.Exception as Exception
+import Network.Oracle.BMC.Exception (throwLeftIO, BMCException(..))
 
 import Control.Applicative ((<$>))
 import Control.Exception
@@ -88,32 +86,29 @@ configFileBMCSCredentialsProvider path key = do
 --
 -- This provides everything needed to authenticate a user
 --
-configFileCredentialsProvider :: FilePath
-                              -> T.Text
-                              -> IO (Either String Credentials)
-configFileCredentialsProvider path key = do
-  expandedPath <- expandPath path
-  creds <- configFileBMCSCredentialsProvider expandedPath key
-  case creds of
-    Left e -> return (Left e)
-    Right (BMCCredentials u f k t)
-            -- TODO (OL) Catch the IO exception and pass to Left
-     -> do
-      expandedKeyPath <- expandPath (T.unpack k)
-      sshKeyRaw <- TIO.readFile expandedKeyPath
-      return . Right $ Credentials u f sshKeyRaw t
+configFileCredentialsProvider :: FilePath -> T.Text -> IO Credentials
+configFileCredentialsProvider path key =
+  let eitherCredentials = do
+        expandedPath <- expandPath path
+        creds <- configFileBMCSCredentialsProvider expandedPath key
+        case creds of
+          Left e -> return . Left $ InvalidCredentialsException e
+          Right (BMCCredentials u f k t) -> do
+            expandedKeyPath <- expandPath (T.unpack k)
+            sshKeyRaw <- TIO.readFile expandedKeyPath
+            return . Right $ Credentials u f sshKeyRaw t
+  in throwLeftIO eitherCredentials
 
 -- | Handler for the most common case where credentials are stored in the default location
 --   with the default profile
 --
 defaultCredentialsProvider :: IO Credentials
 defaultCredentialsProvider =
-  Exception.throwLeftIO $
   configFileCredentialsProvider "~/.oraclebmc/config" "DEFAULT"
 
 -- | Generate the keyId from a set of credentials. A BMCS key takes the form
 --
 -- >> <TENANCY OCID>/<USER OCID>/<KEY FINGERPRINT>
 --
-keyId :: Credentials -> BS.ByteString
-keyId (Credentials u f _ t) = Encoding.encodeUtf8 $ t <> "/" <> u <> "/" <> f
+getKeyId :: Credentials -> BS.ByteString
+getKeyId (Credentials u f _ t) = Encoding.encodeUtf8 $ t <> "/" <> u <> "/" <> f

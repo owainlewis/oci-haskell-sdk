@@ -1,27 +1,33 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 
-module Network.Oracle.BMC.Exception where
+module Network.Oracle.BMC.Exception
+  ( BMCException(..)
+  , throwLeftIO
+  ) where
 
 import Control.Exception
 import Data.Typeable
 
 --------------------------------------------------------
-data BareMetalCloudException =
-  SimpleException String
-  deriving (Typeable)
+data BMCException
+  = RSASignatureException String
+  | InvalidCredentialsException String
+  | GenericException String
+  deriving (Eq, Typeable)
 
-instance Show BareMetalCloudException where
-  show (SimpleException e) = e
+instance Show BMCException where
+  show (RSASignatureException e) = e
+  show (InvalidCredentialsException e) = e
+  show (GenericException e) = e
 
-instance Exception BareMetalCloudException
+instance Exception BMCException
 
 ------------------------------------------------------
--- | Convert Either errors into impure IO errors
 throwLeftIO
-  :: Show e
+  :: Exception e
   => IO (Either e b) -> IO b
 throwLeftIO ioe = do
   result <- ioe
   case result of
-    Left e -> throwIO (SimpleException . show $ e)
+    Left e -> throwIO e
     Right a -> return a

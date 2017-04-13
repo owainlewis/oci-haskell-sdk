@@ -74,9 +74,7 @@ computeSignature request = BS.intercalate "\n" hdrs
 base64EncodedRequestSignature :: Request -> IO BS.ByteString
 base64EncodedRequestSignature request = do
   let signature = computeSignature request
-  Signature.signBase64Unsafe
-    "/home/owainlewis/.oraclebmc/bmcs_api_key.pem"
-    signature
+  Signature.signBase64 "/home/owainlewis/.oraclebmc/bmcs_api_key.pem" signature
 
 zipHeaderPairs :: [(BS.ByteString, BS.ByteString)] -> BS.ByteString
 zipHeaderPairs pairs = BS.intercalate "," $ map f pairs
@@ -109,5 +107,5 @@ addAuthHeader request keyId =
 -- information to it based on credentials provided
 transform :: Credentials.Credentials -> Request -> IO Request
 transform credentials request =
-  let keyId = Credentials.keyId credentials
+  let keyId = Credentials.getKeyId credentials
   in addGenericHeaders request >>= (flip addAuthHeader keyId)

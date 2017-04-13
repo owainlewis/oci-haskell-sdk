@@ -10,7 +10,8 @@ import Data.String (IsString)
 
 import qualified Data.ByteString as BS
 
-import Network.Oracle.BMC.Credentials(Credentials, defaultCredentialsProvider)
+import Network.Oracle.BMC.Credentials
+       (Credentials, defaultCredentialsProvider)
 
 versionedPath
   :: (Semigroup a, IsString a)
@@ -25,15 +26,12 @@ mkBaseRequest :: BS.ByteString -> Request
 mkBaseRequest path =
   setRequestHost "iaas.us-phoenix-1.oraclecloud.com" $
   setRequestSecure True $
-  setRequestPort 443 $
-  setRequestPath (versionedPath path) $
-  defaultRequest
+  setRequestPort 443 $ setRequestPath (versionedPath path) $ defaultRequest
 
 listInstances :: BS.ByteString -> Request
 listInstances compartmentId =
   setRequestQueryString [("compartmentId", Just compartmentId)] $
   mkBaseRequest "/instances"
-
 
 listInstancesRequest :: IO Credentials -> IO Request
 listInstancesRequest credentialsProvider = do
