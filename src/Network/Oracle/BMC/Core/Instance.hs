@@ -3,12 +3,18 @@
 module Network.Oracle.BMC.Core.Instance where
 
 import Network.HTTP.Simple
+import qualified Network.HTTP.Client as Client
+import Network.HTTP.Types.Status(statusCode)
 import qualified Network.Oracle.BMC.Transport.Request as Request
+
 
 import Data.Semigroup (Semigroup, (<>))
 import Data.String (IsString)
 
 import qualified Data.ByteString as BS
+
+import Data.Aeson
+import Network.Oracle.BMC.Core.Types.Instance
 
 import Network.Oracle.BMC.Credentials
        (Credentials, defaultCredentialsProvider)
@@ -43,4 +49,8 @@ listInstancesRequest credentialsProvider = do
          "ocid1.compartment.oc1..aaaaaaaa3um2atybwhder4qttfhgon4j3hcxgmsvnyvx4flfjyewkkwfzwnq")
   return req
 
-main = listInstancesRequest defaultCredentialsProvider >>= httpLbs
+main :: IO [Instance]
+main = do
+    response <- listInstancesRequest defaultCredentialsProvider >>= httpJSON
+    let body = Client.responseBody response
+    return $ body
