@@ -1,5 +1,15 @@
 {-# LANGUAGE DeriveDataTypeable #-}
-
+{-# LANGUAGE OverloadedStrings #-}
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Network.Oracle.BMC.Exception
+-- License     :  BSD-style (see the file LICENSE)
+--
+-- Maintainer  :  Owain Lewis <owain@owainlewis.com>
+--
+-- Unified exception types for HTTP request to Oracle Bare Metal Cloud
+--
+-----------------------------------------------------------------------------
 module Network.Oracle.BMC.Exception
   ( BMCException(..)
   , throwLeftIO

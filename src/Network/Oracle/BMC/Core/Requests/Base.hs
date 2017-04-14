@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Network.Oracle.BMC.Core.ComputeRequest
+module Network.Oracle.BMC.Core.Requests.Base
   ( mkBaseRequest
   ) where
 

@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+-----------------------------------------------------------------------------
 -- |
 -- Module      : Network.Oracle.BMC.Signature
 --
@@ -7,7 +8,9 @@
 -- Stability   : experimental
 -- Portability : GHC
 --
---
+-- This module is used to sign strings using a private key. This functionality is
+-- required in order to implement the HTTP authentication specification
+-----------------------------------------------------------------------------
 module Network.Oracle.BMC.Signature
   ( signBase64
   ) where

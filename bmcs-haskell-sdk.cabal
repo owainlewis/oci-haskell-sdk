@@ -1,6 +1,6 @@
 name:                bmcs-haskell-sdk
 version:             0.1.0.0
-synopsis:            Haskell driver for Oracle Bare Metal Cloud
+synopsis:            Haskell SDK for Oracle Bare Metal Cloud
 description:         Please see README.md
 homepage:            https://github.com/owainlewis/bmcs-haskell-sdk#readme
 license:             BSD3
@@ -35,7 +35,7 @@ library
                      , text
                      , time >= 1.6.0.1
   default-language:    Haskell2010
-
+                       
 test-suite bmcs-haskell-sdk-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test

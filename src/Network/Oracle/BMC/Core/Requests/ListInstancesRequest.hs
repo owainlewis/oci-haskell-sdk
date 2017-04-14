@@ -4,7 +4,7 @@ module Network.Oracle.BMC.Core.Requests.ListInstancesRequest where
 
 import qualified Data.ByteString as BS
 import Network.HTTP.Simple
-import Network.Oracle.BMC.Core.ComputeRequest (mkBaseRequest)
+import Network.Oracle.BMC.Core.Requests.Base (mkBaseRequest)
 import Network.Oracle.BMC.RequestBase
 
 ----------------------------------------------------------------------
