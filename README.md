@@ -16,9 +16,21 @@ creds :: IO Credentials
 creds = Credentials.configFileCredentialsProvider "~/.oraclebmc/config" "DEFAULT"
 ```
 
-## Requests
-
 ## Examples
+
+### Instances
+
+Get a list of all instances in a compartment
+
+```
+
+```
+
+Get a single instance
+
+```
+Client.getInstance (getInstanceRequest "ocid...")
+```
 
 configFileCredentialsProvider "~/.oraclebmc/config" "DEFAULT"
 
