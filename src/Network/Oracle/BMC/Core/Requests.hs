@@ -5,5 +5,5 @@ module Network.Oracle.BMC.Core.Requests
   , GetInstanceRequest(..)
   ) where
 
-import Network.Oracle.BMC.Core.Requests.ListInstancesRequest
 import Network.Oracle.BMC.Core.Requests.GetInstanceRequest
+import Network.Oracle.BMC.Core.Requests.ListInstancesRequest

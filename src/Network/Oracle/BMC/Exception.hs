@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE OverloadedStrings #-}
+
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Network.Oracle.BMC.Exception
@@ -15,7 +16,7 @@ module Network.Oracle.BMC.Exception
   , throwLeftIO
   ) where
 
-import Control.Exception(throwIO, Exception)
+import Control.Exception (throwIO, Exception)
 import Data.Typeable
 
 --------------------------------------------------------
@@ -43,4 +44,3 @@ throwLeftIO ioe = do
   case result of
     Left e -> throwIO e
     Right a -> return a
-
