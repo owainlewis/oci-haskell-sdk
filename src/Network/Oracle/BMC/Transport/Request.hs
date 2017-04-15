@@ -103,8 +103,9 @@ addAuthHeader request keyId =
             request
 
 --------------------------------------------------------------------------------
--- Take a normal HTTP request and add the appropritate authentication signature
--- information to it based on credentials provided
+-- | Take a normal HTTP request and add the appropritate authentication signature
+--   information to it based on credentials provided
+--
 transform :: Credentials.Credentials -> Request -> IO Request
 transform credentials request =
   let keyId = Credentials.getKeyId credentials
