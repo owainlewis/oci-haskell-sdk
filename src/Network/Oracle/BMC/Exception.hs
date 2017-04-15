@@ -15,7 +15,7 @@ module Network.Oracle.BMC.Exception
   , throwLeftIO
   ) where
 
-import Control.Exception
+import Control.Exception(throwIO, Exception)
 import Data.Typeable
 
 --------------------------------------------------------
@@ -23,12 +23,14 @@ data BMCException
   = RSASignatureException String
   | InvalidCredentialsException String
   | GenericException String
+  | JSONParseException
   deriving (Eq, Typeable)
 
 instance Show BMCException where
   show (RSASignatureException e) = e
   show (InvalidCredentialsException e) = e
   show (GenericException e) = e
+  show (JSONParseException) = "Unable to parse JSON"
 
 instance Exception BMCException
 
@@ -41,3 +43,4 @@ throwLeftIO ioe = do
   case result of
     Left e -> throwIO e
     Right a -> return a
+

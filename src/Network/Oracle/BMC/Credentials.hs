@@ -12,6 +12,7 @@
 -----------------------------------------------------------------------------
 module Network.Oracle.BMC.Credentials
   ( Credentials(..)
+  , CredentialsProvider
   , configFileCredentialsProvider
   , defaultCredentialsProvider
   , getKeyId
@@ -35,6 +36,8 @@ import qualified Data.ByteString as BS
 
 type CredentialError = String
 
+type CredentialsProvider = IO Credentials
+
 -- | Expands a shorthand path expression i.e ~/Workspace will be expanded
 --   to an absolute path including the users home directory
 --
@@ -45,11 +48,6 @@ expandPath p = do
     case p of
       ('~':t) -> home ++ t
       _ -> p
-
--- | The default location for Oracle BMC credentials
---
-defaultLocation :: IO FilePath
-defaultLocation = expandPath "~/.oraclebmc/config"
 
 data BMCCredentials = BMCCredentials
   { bmcUser :: T.Text

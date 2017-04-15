@@ -6,14 +6,15 @@ This library provides a Haskell interface for working with the Oracle Bare Metal
 
 ## Credentials
 
-In order to make request to the Oracle Bare Metal Cloud API, you will need credentials. (see TODO)
+In order to make request to the Oracle Bare Metal Cloud API, you will need credentials.
+
+In most cases these will be loaded from the default profile and location
 
 ```haskell
-
-import qualified Network.Oracle.BMC.Credentails as Credentials
+import Network.Oracle.BMC.Credentials(configFileCredentialsProvider, Credentials)
 
 creds :: IO Credentials
-creds = Credentials.configFileCredentialsProvider "~/.oraclebmc/config" "DEFAULT"
+creds = configFileCredentialsProvider "~/.oraclebmc/config" "DEFAULT"
 ```
 
 ## Examples
@@ -22,17 +23,24 @@ creds = Credentials.configFileCredentialsProvider "~/.oraclebmc/config" "DEFAULT
 
 Get a list of all instances in a compartment
 
-```
-
-```
+TODO
 
 Get a single instance
 
-```
-Client.getInstance (getInstanceRequest "ocid...")
-```
+```haskell
+import Network.Oracle.BMC.Core.Client
+import Network.Oracle.BMC.Core.Requests
 
-configFileCredentialsProvider "~/.oraclebmc/config" "DEFAULT"
+-- λ> getInstance defaultCredentialsProvider (getInstancesRequest "ocid...")
+--Right (Instance {availabilityDomain = "NWuj:PHX-AD-1", 
+--                 compartmentId = "ocid1.compartment.oc1...", 
+--                 displayName = "Some Instance", 
+--                 id = "ocid1.instance.oc1.phx....", 
+--                 imageId = "ocid1.image.oc1.phx....", 
+--                 region = "phx", 
+--                 shape = "VM.Standard1.4", 
+--                 timeCreated = "2017-01-04T15:50:31.288Z"})
+```
 
 ## Links and references
 
