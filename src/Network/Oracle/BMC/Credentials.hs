@@ -22,7 +22,8 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as Encoding
 import qualified Data.Text.IO as TIO
 
-import Network.Oracle.BMC.Exception (throwLeftIO, BMCException(..))
+import Network.Oracle.BMC.Internal.Exception
+       (throwLeftIO, BMCException(..))
 
 import Control.Applicative ((<$>))
 import Control.Exception

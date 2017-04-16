@@ -11,7 +11,7 @@
 -- Unified exception types for HTTP request to Oracle Bare Metal Cloud
 --
 -----------------------------------------------------------------------------
-module Network.Oracle.BMC.Exception
+module Network.Oracle.BMC.Internal.Exception
   ( BMCException(..)
   , throwLeftIO
   ) where

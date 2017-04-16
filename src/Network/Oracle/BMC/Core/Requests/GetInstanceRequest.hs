@@ -6,7 +6,7 @@ import qualified Data.ByteString as BS
 import Data.Semigroup ((<>))
 import Network.HTTP.Simple
 import Network.Oracle.BMC.Core.Requests.Base (mkBaseRequest)
-import Network.Oracle.BMC.RequestBase
+import Network.Oracle.BMC.Internal.Request
 
 ----------------------------------------------------------------------
 data GetInstanceRequest = GetInstanceRequest

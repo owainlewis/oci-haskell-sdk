@@ -11,7 +11,7 @@
 -- This module is used to sign strings using a private key. This functionality is
 -- required in order to implement the HTTP authentication specification
 -----------------------------------------------------------------------------
-module Network.Oracle.BMC.Signature
+module Network.Oracle.BMC.Internal.Signature
   ( signBase64
   ) where
 
@@ -24,7 +24,8 @@ import qualified Data.ByteString.Base64 as B64
 import qualified Data.ByteString.Lazy.Char8 as C
 
 import Control.Exception (throwIO)
-import Network.Oracle.BMC.Exception (throwLeftIO, BMCException(..))
+import Network.Oracle.BMC.Internal.Exception
+       (throwLeftIO, BMCException(..))
 
 import Data.Bifunctor (bimap)
 

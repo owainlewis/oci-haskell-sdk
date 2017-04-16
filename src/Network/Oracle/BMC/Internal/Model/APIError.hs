@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Network.Oracle.BMC.Core.Model.APIError where
+module Network.Oracle.BMC.Internal.Model.APIError where
 
 import Control.Monad (mzero)
 import Data.Aeson

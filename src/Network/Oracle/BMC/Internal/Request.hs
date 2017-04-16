@@ -11,8 +11,13 @@
 -- https://tools.ietf.org/html/draft-cavage-http-signatures-05
 --
 -----------------------------------------------------------------------------
-module Network.Oracle.BMC.Transport.Request
-  ( transform
+module Network.Oracle.BMC.Internal.Request
+  ( Path(..)
+  , Query(..)
+  , ToRequest(..)
+  , unPath
+  , unQuery
+  , transform
   ) where
 
 import qualified Data.ByteString as BS
@@ -24,7 +29,28 @@ import Data.Time
 import Network.HTTP.Client (Request(..))
 import Network.HTTP.Simple
 import qualified Network.Oracle.BMC.Credentials as Credentials
-import qualified Network.Oracle.BMC.Signature as Signature
+import qualified Network.Oracle.BMC.Internal.Signature as Signature
+
+data Path a =
+  Path a
+  deriving (Eq, Show)
+
+data Query a =
+  Query a
+  deriving (Eq, Show)
+
+class ToRequest a where
+  toRequest :: a -> Request
+
+-- | Extract the underlying value from a query
+--
+unQuery :: Query t -> t
+unQuery (Query x) = x
+
+-- | Extract the underlying value from a path
+--
+unPath :: Path t -> t
+unPath (Path x) = x
 
 --------------------------------------------------------------------------------
 -- Add HTTP headers

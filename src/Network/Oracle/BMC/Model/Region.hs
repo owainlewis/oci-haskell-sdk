@@ -1,4 +1,4 @@
-module Network.Oracle.BMC.Region
+module Network.Oracle.BMC.Model.Region
   ( Region(..)
   , computeRegionEndpoint
   ) where
