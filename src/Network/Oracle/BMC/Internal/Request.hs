@@ -18,6 +18,7 @@ module Network.Oracle.BMC.Internal.Request
   , unPath
   , unQuery
   , transform
+  , flattenQuery
   ) where
 
 import qualified Data.ByteString as BS
@@ -39,8 +40,12 @@ data Query a =
   Query a
   deriving (Eq, Show)
 
+flattenQuery :: [(t, Maybe (Query a))] -> [(t, Maybe a)]
+flattenQuery ls = [(k, Just . unQuery $ x) | (k, Just x) <- ls]
+
 class ToRequest a where
   toRequest :: a -> Request
+  extractQuery :: a -> [(BS.ByteString, Maybe BS.ByteString)]
 
 -- | Extract the underlying value from a query
 --

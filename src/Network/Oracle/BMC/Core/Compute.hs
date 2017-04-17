@@ -28,3 +28,5 @@ listInstances :: CredentialsProvider
               -> ListInstancesRequest
               -> BMCAPIResponse [Instance]
 listInstances = runRequest
+
+eg = listInstances defaultCredentialsProvider (listInstancesRequest "")

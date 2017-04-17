@@ -46,6 +46,6 @@ runRequestMaybe credentialsProvider request = do
 --
 runRequest
   :: (ToRequest a, FromJSON b)
-  => IO Credentials -> a -> IO (Either APIError b)
+  => IO Credentials -> a -> BMCAPIResponse b
 runRequest credentialsProvider request =
   throwEitherMaybe (runRequestMaybe credentialsProvider request)

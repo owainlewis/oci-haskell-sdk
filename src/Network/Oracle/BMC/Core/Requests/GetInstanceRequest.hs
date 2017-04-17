@@ -19,3 +19,4 @@ getInstanceRequest instanceId =
 instance ToRequest GetInstanceRequest where
   toRequest (GetInstanceRequest instanceId) =
     mkBaseRequest $ "/20160918/instances/" <> (unPath instanceId)
+  extractQuery _ = []

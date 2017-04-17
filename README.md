@@ -16,6 +16,23 @@ import Network.Oracle.BMC.Credentials(configFileCredentialsProvider, Credentials
 creds :: IO Credentials
 creds = configFileCredentialsProvider "~/.oraclebmc/config" "DEFAULT"
 ```
+
+## Introduction
+
+This library offers high level APIs for working with the Oracle Bare Metal Cloud Service. All responses
+have the following signature. 
+
+```haskell
+type BMCAPIResponse a = IO (Either APIError a)
+```
+
+In the case of a non 200 repsonse code the library will cast the underlying
+repsonse into an appropritate type.
+
+```haskell
+Left (APIError {code = "MissingParameter", message = "Missing compartmentId"})
+```
+
 ## Examples
 
 Some examples to get you started
@@ -28,7 +45,9 @@ Get a single instance by ID
 import Network.Oracle.BMC.Core.Client
 import Network.Oracle.BMC.Core.Requests
 
--- λ> getInstance defaultCredentialsProvider (getInstancesRequest "ocid...")
+response :: BMCSAPIResponse
+response = getInstance defaultCredentialsProvider (getInstancesRequest "ocid...")
+
 -- Right (Instance {availabilityDomain = "NWuj:PHX-AD-1", 
 --                  compartmentId = "ocid1.compartment.oc1...", 
 --                  displayName = "Some Instance", 
