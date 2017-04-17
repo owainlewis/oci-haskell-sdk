@@ -1,0 +1,6 @@
+[DEFAULT]
+user=user
+fingerprint=fingerprint
+key_file=test/Fixtures/bmcs_api_key.pem
+tenancy=tenancy
+region=us-phoenix-1
