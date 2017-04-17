@@ -7,6 +7,7 @@ module Network.Oracle.BMC.Core.Compute
 
 import Network.Oracle.BMC.Core.Model.Instance
 import Network.Oracle.BMC.Core.Requests.GetInstanceRequest
+import Network.Oracle.BMC.Core.Requests.LaunchInstanceRequest
 import Network.Oracle.BMC.Core.Requests.ListInstancesRequest
 import Network.Oracle.BMC.Credentials
 import Network.Oracle.BMC.Internal.Dispatcher
@@ -29,4 +30,10 @@ listInstances :: CredentialsProvider
               -> BMCAPIResponse [Instance]
 listInstances = runRequest
 
-eg = listInstances defaultCredentialsProvider (listInstancesRequest "")
+eg =
+  runRequestRaw
+    defaultCredentialsProvider
+    (launchInstanceRequest ad compartmentId "" "" "")
+  where
+    ad = ""
+    compartmentId = ""

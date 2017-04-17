@@ -1,5 +1,6 @@
 module Network.Oracle.BMC.Internal.Dispatcher
   ( runRequest
+  , runRequestRaw
   , BMCAPIResponse
   ) where
 
@@ -11,6 +12,8 @@ import Network.Oracle.BMC.Credentials
 import Network.Oracle.BMC.Internal.Exception (BMCException(..))
 import Network.Oracle.BMC.Internal.Model.APIError
 import Network.Oracle.BMC.Internal.Request
+
+import qualified Data.ByteString.Lazy as LBS
 
 import Control.Exception (throwIO)
 
@@ -42,10 +45,18 @@ runRequestMaybe credentialsProvider request = do
           else Right <$> decode $ responseBody response
   return outcome
 
--- | Run a HTTP request and return either an API Error (HTTP code 400+) or a valid response
---
+-- | Run a HTTP request and return either an API Error (HTTP code 400+) or a valid Aeson response
 runRequest
   :: (ToRequest a, FromJSON b)
   => IO Credentials -> a -> BMCAPIResponse b
 runRequest credentialsProvider request =
   throwEitherMaybe (runRequestMaybe credentialsProvider request)
+
+-- | Run a request and return the raw response
+runRequestRaw
+  :: ToRequest a
+  => IO Credentials -> a -> IO (Response LBS.ByteString)
+runRequestRaw credentialsProvider request = do
+  credentials <- credentialsProvider
+  response <- transform credentials (toRequest request) >>= httpLBS
+  return response
