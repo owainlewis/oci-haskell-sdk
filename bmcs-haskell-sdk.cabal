@@ -16,7 +16,6 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     Network.Oracle.BMC.Credentials
-                     , Network.Oracle.BMC.Core.Requests.Base
                      , Network.Oracle.BMC.Internal.Dispatcher
                      , Network.Oracle.BMC.Internal.Exception
                      , Network.Oracle.BMC.Internal.Model.APIError
@@ -26,10 +25,11 @@ library
                      , Network.Oracle.BMC.Core.Compute
                      , Network.Oracle.BMC.Core.BlockStorage
                      , Network.Oracle.BMC.Core.VirtualNetwork                       
-                     , Network.Oracle.BMC.Core.Model.Instance                       
+                     , Network.Oracle.BMC.Core.Model.Instance
+                     , Network.Oracle.BMC.Core.Requests.Base
                      , Network.Oracle.BMC.Core.Requests.GetInstanceRequest
                      , Network.Oracle.BMC.Core.Requests.ListInstancesRequest
-                     , Network.Oracle.BMC.Core.Requests.LaunchInstancesRequest                       
+                     , Network.Oracle.BMC.Core.Requests.LaunchInstanceRequest                       
   build-depends:       RSA >= 2.2.0
                      , aeson
                      , base >= 4.7 && < 5
