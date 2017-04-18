@@ -1,8 +1,9 @@
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE OverloadedStrings #-}
 
------------------------------------------------------------------------------
+-------------------------------------------------------------------------
 -- |
--- Module      :  Network.Oracle.BMC.Transport.Request
+-- Module      :  Network.Oracle.BMC.Internal.Request
 -- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  Owain Lewis <owain@owainlewis.com>
@@ -10,15 +11,10 @@
 -- Add appropriate authentication information to a HTTP request based on
 -- https://tools.ietf.org/html/draft-cavage-http-signatures-05
 --
------------------------------------------------------------------------------
+-------------------------------------------------------------------------
 module Network.Oracle.BMC.Internal.Request
-  ( Path(..)
-  , Query(..)
-  , ToRequest(..)
-  , unPath
-  , unQuery
+  ( ToRequest(..)
   , transform
-  , flattenQuery
   ) where
 
 import qualified Data.ByteString as BS
@@ -32,37 +28,16 @@ import Network.HTTP.Simple
 import qualified Network.Oracle.BMC.Credentials as Credentials
 import qualified Network.Oracle.BMC.Internal.Signature as Signature
 
-data Path a =
-  Path a
-  deriving (Eq, Show)
-
-data Query a =
-  Query a
-  deriving (Eq, Show)
-
-flattenQuery :: [(t, Maybe (Query a))] -> [(t, Maybe a)]
-flattenQuery ls = [(k, Just . unQuery $ x) | (k, Just x) <- ls]
-
 class ToRequest a where
   toRequest :: a -> Request
   extractQuery :: a -> [(BS.ByteString, Maybe BS.ByteString)]
 
--- | Extract the underlying value from a query
---
-unQuery :: Query t -> t
-unQuery (Query x) = x
-
--- | Extract the underlying value from a path
---
-unPath :: Path t -> t
-unPath (Path x) = x
-
---------------------------------------------------------------------------------
+-------------------------------------------------------------------------
 -- Add HTTP headers
 --
 -- These methods add the required HTTP headers to a request.
 --
---------------------------------------------------------------------------------
+-------------------------------------------------------------------------
 type HeaderTransformer = Request -> IO Request
 
 -- Add a HTTP date header. It appears this has to be in GMT
@@ -85,18 +60,23 @@ addRequestTargetHeader request =
 addHostHeader :: HeaderTransformer
 addHostHeader request = pure $ setRequestHeader "host" [(host request)] request
 
+-- Headers for POST | PUT requests
 addContentTypeDefault :: HeaderTransformer
 addContentTypeDefault request =
   pure $ setRequestHeader "content-type" ["application/json"] request
 
---------------------------------------------------------------------------------
+addContentLengthHeader request = request
+
+addContentSizeHeader request = request
+
+-------------------------------------------------------------------------
 -- | TODO dispatch on HTTP method adding additional headers if needed
 addGenericHeaders :: Request -> IO Request
 addGenericHeaders request =
   addDateHeader request >>= addRequestTargetHeader >>= addHostHeader >>=
   addContentTypeDefault
 
---------------------------------------------------------------------------------
+-------------------------------------------------------------------------
 computeSignature :: Request -> BS.ByteString
 computeSignature request = BS.intercalate "\n" hdrs
   where
@@ -112,7 +92,7 @@ zipHeaderPairs pairs = BS.intercalate "," $ map f pairs
   where
     f = (\(k, v) -> k <> "=\"" <> v <> "\"")
 
---------------------------------------------------------------------------------
+---------------------------------------------------------------------------
 -- | Adds the Authorization Signature HTTP header to a request which is
 --   formed by signing the HTTP headers
 --
@@ -133,7 +113,7 @@ addAuthHeader request keyId =
             ["Signature " <> requestSignature]
             request
 
---------------------------------------------------------------------------------
+---------------------------------------------------------------------
 -- | Take a normal HTTP request and add the appropritate authentication signature
 --   information to it based on credentials provided
 --

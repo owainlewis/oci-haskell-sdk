@@ -1,3 +1,13 @@
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Network.Oracle.BMC.Internal.Dispatcher
+-- License     :  BSD-style (see the file LICENSE)
+--
+-- Maintainer  :  Owain Lewis <owain@owainlewis.com>
+--
+--
+--
+-----------------------------------------------------------------------------
 module Network.Oracle.BMC.Internal.Dispatcher
   ( runRequest
   , runRequestRaw

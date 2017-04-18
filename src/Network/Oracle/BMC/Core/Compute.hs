@@ -1,5 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Network.Oracle.BMC.Core.Compute
+-- License     :  BSD-style (see the file LICENSE)
+--
+-- Maintainer  :  Owain Lewis <owain@owainlewis.com>
+--
+-- A high level client for the Oracle BMCS compute services
+--
+-----------------------------------------------------------------------------
 module Network.Oracle.BMC.Core.Compute
   ( getInstance
   , listInstances

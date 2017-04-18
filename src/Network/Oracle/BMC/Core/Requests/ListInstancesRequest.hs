@@ -4,11 +4,11 @@ module Network.Oracle.BMC.Core.Requests.ListInstancesRequest where
 
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as C8
+import Data.Maybe (catMaybes)
 import Network.HTTP.Simple
 import Network.Oracle.BMC.Core.Requests.Base (mkBaseRequest)
+import Network.Oracle.BMC.Internal.Query
 import Network.Oracle.BMC.Internal.Request
-
-import Data.Maybe (catMaybes)
 
 ----------------------------------------------------------------------
 data ListInstancesRequest = ListInstancesRequest
@@ -19,8 +19,6 @@ data ListInstancesRequest = ListInstancesRequest
   , page :: Maybe (Query Int)
   } deriving (Eq, Show)
 
--- | Smart constructor for a list instances request
---
 listInstancesRequest :: BS.ByteString -> ListInstancesRequest
 listInstancesRequest compartmentId =
   ListInstancesRequest
@@ -40,4 +38,6 @@ instance ToRequest ListInstancesRequest where
       [ ("compartmentId", (pure . compartmentId $ request))
       , ("availabilityDomain", (availabilityDomain request))
       , ("displayName", (displayName request))
+      , ("limit", intQueryToByteString <$> (limit request))
+      , ("page", intQueryToByteString <$> (page request))
       ]

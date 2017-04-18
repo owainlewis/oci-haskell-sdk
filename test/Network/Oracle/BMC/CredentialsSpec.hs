@@ -20,4 +20,3 @@ spec = do
       (user credentials) `shouldBe` "user"
       (fingerprint credentials) `shouldBe` "fingerprint"
       (tenancy credentials) `shouldBe` "tenancy"
-      (region credentials) `shouldBe` "us-phoenix-1"

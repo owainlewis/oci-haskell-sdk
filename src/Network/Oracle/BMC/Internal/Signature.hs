@@ -2,7 +2,7 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      : Network.Oracle.BMC.Signature
+-- Module      : Network.Oracle.BMC.Internal.Signature
 --
 -- Maintainer  : Owain Lewis <owain@owainlewis.com>
 -- Stability   : experimental
