@@ -1,8 +1,6 @@
 # Oracle BMCS Haskell SDK
 
-Haskell SDK for Oracle Bare Metal Cloud Services.
-
-![](http://static.wixstatic.com/media/740ab9_b47eb87dc958468b9b40a8aebc4fc546.png)
+### Haskell SDK for Oracle Bare Metal Cloud Services.
 
 This library provides a Haskell interface for working with the Oracle Bare Metal Cloud
 
