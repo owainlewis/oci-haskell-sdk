@@ -25,7 +25,8 @@ import Data.Semigroup ((<>))
 import Data.Time
 import Network.HTTP.Client (Request(..))
 import Network.HTTP.Simple
-import qualified Network.Oracle.BMC.Credentials as Credentials
+import Network.Oracle.BMC.Credentials
+       (Credentials, getKeyId, getKeyPath)
 import qualified Network.Oracle.BMC.Internal.Signature as Signature
 
 class ToRequest a where
@@ -65,6 +66,9 @@ addContentTypeDefault :: HeaderTransformer
 addContentTypeDefault request =
   pure $ setRequestHeader "content-type" ["application/json"] request
 
+-------------------------------------------------------------------------
+addContentBodyRSA256 request = request
+
 addContentLengthHeader request = request
 
 addContentSizeHeader request = request
@@ -82,10 +86,10 @@ computeSignature request = BS.intercalate "\n" hdrs
   where
     hdrs = map (\(k, v) -> original k <> ": " <> v) (requestHeaders request)
 
---base64EncodedRequestSignature :: Request -> IO BS.ByteString
+base64EncodedRequestSignature :: Credentials -> Request -> IO BS.ByteString
 base64EncodedRequestSignature credentials request = do
   let signature = computeSignature request
-  Signature.signBase64 "/home/owainlewis/.oraclebmc/bmcs_api_key.pem" signature
+  Signature.signBase64 (getKeyPath credentials) signature
 
 zipHeaderPairs :: [(BS.ByteString, BS.ByteString)] -> BS.ByteString
 zipHeaderPairs pairs = BS.intercalate "," $ map f pairs
@@ -96,7 +100,7 @@ zipHeaderPairs pairs = BS.intercalate "," $ map f pairs
 -- | Adds the Authorization Signature HTTP header to a request which is
 --   formed by signing the HTTP headers
 --
---addAuthHeader :: Request -> BS.ByteString -> IO Request
+addAuthHeader :: Credentials -> Request -> BS.ByteString -> IO Request
 addAuthHeader credentials request keyId =
   let headers = (BS.intercalate " ") . map (original . fst) . requestHeaders
   in do signature <- base64EncodedRequestSignature credentials request
@@ -117,7 +121,7 @@ addAuthHeader credentials request keyId =
 -- | Take a normal HTTP request and add the appropritate authentication signature
 --   information to it based on credentials provided
 --
-transform :: Credentials.Credentials -> Request -> IO Request
+transform :: Credentials -> Request -> IO Request
 transform credentials request =
-  let keyId = Credentials.getKeyId credentials
+  let keyId = getKeyId credentials
   in addGenericHeaders request >>= (flip (addAuthHeader credentials) keyId)

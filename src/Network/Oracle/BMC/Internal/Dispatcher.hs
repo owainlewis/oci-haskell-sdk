@@ -5,7 +5,8 @@
 --
 -- Maintainer  :  Owain Lewis <owain@owainlewis.com>
 --
---
+-- Module responsible for running HTTP requests and transforming them by adding the appropriate
+-- authentication information.
 --
 -----------------------------------------------------------------------------
 module Network.Oracle.BMC.Internal.Dispatcher

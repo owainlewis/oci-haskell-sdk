@@ -16,6 +16,7 @@ module Network.Oracle.BMC.Credentials
   , configFileCredentialsProvider
   , defaultCredentialsProvider
   , getKeyId
+  , getKeyPath
   ) where
 
 import qualified Data.Text as T
@@ -101,3 +102,6 @@ defaultCredentialsProvider =
 --
 getKeyId :: Credentials -> BS.ByteString
 getKeyId (Credentials u f _ t) = Encoding.encodeUtf8 $ t <> "/" <> u <> "/" <> f
+
+getKeyPath :: Credentials -> String
+getKeyPath = T.unpack . key

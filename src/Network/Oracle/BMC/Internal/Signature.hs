@@ -25,9 +25,9 @@ import qualified Data.ByteString.Lazy.Char8 as C
 
 import Control.Exception (throwIO)
 import Network.Oracle.BMC.Internal.Exception
-       (throwLeftIO, BMCException(..))
+       (BMCException(..), throwLeftIO)
 
-import Data.Bifunctor (second, bimap)
+import Data.Bifunctor (bimap, second)
 
 loadPrivateKey :: FilePath -> IO PrivateKey
 loadPrivateKey keyPath = do
