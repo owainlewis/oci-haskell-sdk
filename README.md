@@ -4,6 +4,11 @@ Haskell SDK for Oracle Bare Metal Cloud Services.
 
 This library provides a Haskell interface for working with the Oracle Bare Metal Cloud
 
+### Supported services
+
+* Compute
+* Object Storage
+
 ## Credentials
 
 In order to make request to the Oracle Bare Metal Cloud API, you will need credentials.
