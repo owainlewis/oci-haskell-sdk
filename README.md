@@ -2,7 +2,7 @@
 
 Haskell SDK for Oracle Bare Metal Cloud Services.
 
-![](https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Oracle_logo.svg/2000px-Oracle_logo.svg.png)
+![](http://static.wixstatic.com/media/740ab9_b47eb87dc958468b9b40a8aebc4fc546.png)
 
 This library provides a Haskell interface for working with the Oracle Bare Metal Cloud
 
