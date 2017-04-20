@@ -27,7 +27,7 @@ import Control.Exception (throwIO)
 import Network.Oracle.BMC.Internal.Exception
        (throwLeftIO, BMCException(..))
 
-import Data.Bifunctor (bimap)
+import Data.Bifunctor (second, bimap)
 
 loadPrivateKey :: FilePath -> IO PrivateKey
 loadPrivateKey keyPath = do
@@ -41,8 +41,7 @@ sign :: FilePath -> BS.ByteString -> IO (Either RSA.RSAError BS.ByteString)
 sign keyPath input = (flip signWithKey input) <$> loadPrivateKey keyPath
 
 signWithKey :: PrivateKey -> BS.ByteString -> Either RSA.RSAError BS.ByteString
-signWithKey key input =
-  bimap id (C.toStrict) (RSA.sign key (C.fromStrict input))
+signWithKey key input = second (C.toStrict) (RSA.sign key (C.fromStrict input))
 
 -- | Sign a byte string with a private key, the path to which is provided as input
 signBase64 :: FilePath -> BS.ByteString -> IO BS.ByteString

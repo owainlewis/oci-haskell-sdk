@@ -82,8 +82,8 @@ computeSignature request = BS.intercalate "\n" hdrs
   where
     hdrs = map (\(k, v) -> original k <> ": " <> v) (requestHeaders request)
 
-base64EncodedRequestSignature :: Request -> IO BS.ByteString
-base64EncodedRequestSignature request = do
+--base64EncodedRequestSignature :: Request -> IO BS.ByteString
+base64EncodedRequestSignature credentials request = do
   let signature = computeSignature request
   Signature.signBase64 "/home/owainlewis/.oraclebmc/bmcs_api_key.pem" signature
 
@@ -96,10 +96,10 @@ zipHeaderPairs pairs = BS.intercalate "," $ map f pairs
 -- | Adds the Authorization Signature HTTP header to a request which is
 --   formed by signing the HTTP headers
 --
-addAuthHeader :: Request -> BS.ByteString -> IO Request
-addAuthHeader request keyId =
+--addAuthHeader :: Request -> BS.ByteString -> IO Request
+addAuthHeader credentials request keyId =
   let headers = (BS.intercalate " ") . map (original . fst) . requestHeaders
-  in do signature <- base64EncodedRequestSignature request
+  in do signature <- base64EncodedRequestSignature credentials request
         let requestSignature =
               zipHeaderPairs
                 [ ("headers", headers request)
@@ -120,4 +120,4 @@ addAuthHeader request keyId =
 transform :: Credentials.Credentials -> Request -> IO Request
 transform credentials request =
   let keyId = Credentials.getKeyId credentials
-  in addGenericHeaders request >>= (flip addAuthHeader keyId)
+  in addGenericHeaders request >>= (flip (addAuthHeader credentials) keyId)

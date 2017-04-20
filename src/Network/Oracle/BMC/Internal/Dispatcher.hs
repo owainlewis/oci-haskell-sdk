@@ -55,7 +55,8 @@ runRequestMaybe credentialsProvider request = do
           else Right <$> decode $ responseBody response
   return outcome
 
--- | Run a HTTP request and return either an API Error (HTTP code 400+) or a valid Aeson response
+-- | Run a HTTP request and return either an API Error (HTTP code 400+)
+--   or a valid Aeson response
 runRequest
   :: (ToRequest a, FromJSON b)
   => IO Credentials -> a -> BMCAPIResponse b
@@ -63,6 +64,7 @@ runRequest credentialsProvider request =
   throwEitherMaybe (runRequestMaybe credentialsProvider request)
 
 -- | Run a request and return the raw response
+--
 runRequestRaw
   :: ToRequest a
   => IO Credentials -> a -> IO (Response LBS.ByteString)

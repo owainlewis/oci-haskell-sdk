@@ -50,13 +50,6 @@ expandPath p = do
       ('~':t) -> home ++ t
       _ -> p
 
-data BMCCredentials = BMCCredentials
-  { bmcUser :: T.Text
-  , bmcFingerprint :: T.Text
-  , bmcKeyFile :: T.Text
-  , bmcTenancy :: T.Text
-  } deriving (Eq, Read, Show)
-
 data Credentials = Credentials
   { user :: T.Text -- User OCID
   , fingerprint :: T.Text -- Fingerprint of private SSH key
@@ -66,24 +59,22 @@ data Credentials = Credentials
 
 -- | Extract a credentials object
 --
-parseBMCCredentials :: T.Text -> Ini -> Either CredentialError BMCCredentials
+parseBMCCredentials :: T.Text -> Ini -> Either CredentialError Credentials
 parseBMCCredentials key ini = do
   user <- lookupValue key "user" ini
   fingerprint <- lookupValue key "fingerprint" ini
   keyFile <- lookupValue key "key_file" ini
   tenancy <- lookupValue key "tenancy" ini
-  return $ BMCCredentials user fingerprint keyFile tenancy
+  return $ Credentials user fingerprint keyFile tenancy
 
 configFileBMCSCredentialsProvider :: FilePath
                                   -> T.Text
-                                  -> IO (Either String BMCCredentials)
+                                  -> IO (Either String Credentials)
 configFileBMCSCredentialsProvider path key = do
   contents <- TIO.readFile path
   return $ (parseIni contents) >>= (parseBMCCredentials key)
 
--- Load credentials including private SSH key raw
---
--- This provides everything needed to authenticate a user
+-- Load credentials from file. This also expands the user home path
 --
 configFileCredentialsProvider :: FilePath -> T.Text -> IO Credentials
 configFileCredentialsProvider path key =
@@ -92,10 +83,9 @@ configFileCredentialsProvider path key =
         creds <- configFileBMCSCredentialsProvider expandedPath key
         case creds of
           Left e -> return . Left $ InvalidCredentialsException e
-          Right (BMCCredentials u f k t) -> do
+          Right (Credentials u f k t) -> do
             expandedKeyPath <- expandPath (T.unpack k)
-            sshKeyRaw <- TIO.readFile expandedKeyPath
-            return . Right $ Credentials u f sshKeyRaw t
+            return . Right $ Credentials u f (T.pack expandedKeyPath) t
   in throwLeftIO eitherCredentials
 
 -- | Handler for the most common case where credentials are stored in the default location
