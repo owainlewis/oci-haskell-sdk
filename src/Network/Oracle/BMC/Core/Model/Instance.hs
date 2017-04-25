@@ -6,7 +6,6 @@ module Network.Oracle.BMC.Core.Model.Instance
 
 import Control.Monad (mzero)
 import Data.Aeson
-
 data Instance = Instance
   { availabilityDomain :: String
   , compartmentId :: String
@@ -20,7 +19,9 @@ data Instance = Instance
 
 instance FromJSON Instance where
   parseJSON (Object v) =
-    Instance <$> v .: "availabilityDomain" <*> v .: "compartmentId" <*>
+    Instance <$>
+    v .: "availabilityDomain" <*>
+    v .: "compartmentId" <*>
     v .: "displayName" <*>
     v .: "id" <*>
     v .: "imageId" <*>

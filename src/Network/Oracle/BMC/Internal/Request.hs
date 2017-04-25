@@ -68,9 +68,7 @@ addContentTypeDefault request =
 
 -------------------------------------------------------------------------
 addContentBodyRSA256 request = request
-
 addContentLengthHeader request = request
-
 addContentSizeHeader request = request
 
 -------------------------------------------------------------------------
