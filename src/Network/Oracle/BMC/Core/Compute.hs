@@ -40,7 +40,7 @@ listInstances :: CredentialsProvider
               -> BMCAPIResponse [Instance]
 listInstances = runRequest
 
-eg =
+launchExample =
   runRequestRaw
     defaultCredentialsProvider
     (launchInstanceRequest ad compartmentId "" "" "")

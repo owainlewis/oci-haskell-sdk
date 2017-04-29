@@ -67,15 +67,21 @@ addContentTypeDefault request =
   pure $ setRequestHeader "content-type" ["application/json"] request
 
 -------------------------------------------------------------------------
-addContentBodyRSA256 request = request
-addContentLengthHeader request = request
-addContentSizeHeader request = request
+-- These should already be defined somewhere as part of the http lib.
+-- ???
+addContentBodyRSA256 request =
+    pure $ setRequestHeader "x-content-sha256" [""] request
+
+addContentLengthHeader request =
+    pure $ setRequestHeader "content-length" [""] request
 
 -------------------------------------------------------------------------
 -- | TODO dispatch on HTTP method adding additional headers if needed
 addGenericHeaders :: Request -> IO Request
 addGenericHeaders request =
-  addDateHeader request >>= addRequestTargetHeader >>= addHostHeader >>=
+  addDateHeader request >>=
+  addRequestTargetHeader >>=
+  addHostHeader >>=
   addContentTypeDefault
 
 -------------------------------------------------------------------------
