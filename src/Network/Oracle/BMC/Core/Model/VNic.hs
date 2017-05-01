@@ -1,4 +1,4 @@
-module Network.Oracle.BMC.Core.Model.VNic were
+module Network.Oracle.BMC.Core.Model.VNic where
 
 -- | A virtual network interface card.
 --   Each instance automatically has a VNIC attached to it,
