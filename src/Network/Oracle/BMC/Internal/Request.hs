@@ -70,18 +70,16 @@ addContentTypeDefault request =
 -- These should already be defined somewhere as part of the http lib.
 -- ???
 addContentBodyRSA256 request =
-    pure $ setRequestHeader "x-content-sha256" [""] request
+  pure $ setRequestHeader "x-content-sha256" [""] request
 
 addContentLengthHeader request =
-    pure $ setRequestHeader "content-length" [""] request
+  pure $ setRequestHeader "content-length" [""] request
 
 -------------------------------------------------------------------------
 -- | TODO dispatch on HTTP method adding additional headers if needed
 addGenericHeaders :: Request -> IO Request
 addGenericHeaders request =
-  addDateHeader request >>=
-  addRequestTargetHeader >>=
-  addHostHeader >>=
+  addDateHeader request >>= addRequestTargetHeader >>= addHostHeader >>=
   addContentTypeDefault
 
 -------------------------------------------------------------------------
@@ -115,11 +113,12 @@ addAuthHeader credentials request keyId =
                 , ("algorithm", "rsa-sha256")
                 , ("signature", signature)
                 ]
-        return $
-          setRequestHeader
-            "authorization"
-            ["Signature " <> requestSignature]
-            request
+            finalHeader =
+              setRequestHeader
+                "authorization"
+                ["Signature " <> requestSignature]
+                request
+        return finalHeader
 
 ---------------------------------------------------------------------
 -- | Take a normal HTTP request and add the appropritate authentication signature

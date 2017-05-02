@@ -1,13 +1,11 @@
-
 {-# LANGUAGE OverloadedStrings #-}
 
 module Network.Oracle.BMC.Core.Requests.UpdateRouteTableRequest where
 
-data UpdateRouteTableRequest = UpdateRouteTableRequest {
-
-} deriving ( Eq, Show )
+data UpdateRouteTableRequest = UpdateRouteTableRequest
+  {
+  } deriving (Eq, Show)
 
 instance ToRequest UpdateRouteTableRequest where
-    toRequest request = error "Not defined"
-    extractQuery _ = []
-
+  toRequest request = error "Not defined"
+  extractQuery _ = []

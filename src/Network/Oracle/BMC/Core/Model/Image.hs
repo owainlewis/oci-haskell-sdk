@@ -7,16 +7,17 @@ module Network.Oracle.BMC.Core.Model.Image
 import Control.Monad (mzero)
 import Data.Aeson
 
-data LifecycleState = Provisioning
-                    | Available
-                    | Disabled
-                    | Deleted
+data LifecycleState
+  = Provisioning
+  | Available
+  | Disabled
+  | Deleted
 
 instance Show LifecycleState where
-    show (Provisioning) = "PROVISIONING"
-    show (Available) = "AVAILABLE"
-    show (Disabled) = "DISABLED"
-    show (Deleted) = "DELETED"
+  show (Provisioning) = "PROVISIONING"
+  show (Available) = "AVAILABLE"
+  show (Disabled) = "DISABLED"
+  show (Deleted) = "DELETED"
 
 data Image = Image
   { baseImageId :: Maybe String
@@ -33,13 +34,12 @@ data Image = Image
 
 instance FromJSON Image where
   parseJSON (Object v) =
-    Image <$> v .: "baseImageId" <*>
-              v .: "compartmentId" <*>
-              v .: "createImageAllowed" <*>
-              v .: "displayName" <*>
-              v .: "id" <*>
-              v .: "lifecycleState" <*>
-              v .: "operatingSystem" <*>
-              v .: "operatingSystemVersion" <*>
-              v .: "timeCreated"
+    Image <$> v .: "baseImageId" <*> v .: "compartmentId" <*>
+    v .: "createImageAllowed" <*>
+    v .: "displayName" <*>
+    v .: "id" <*>
+    v .: "lifecycleState" <*>
+    v .: "operatingSystem" <*>
+    v .: "operatingSystemVersion" <*>
+    v .: "timeCreated"
   parseJSON _ = mzero

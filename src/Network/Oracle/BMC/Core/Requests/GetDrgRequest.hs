@@ -1,13 +1,11 @@
-
 {-# LANGUAGE OverloadedStrings #-}
 
 module Network.Oracle.BMC.Core.Requests.GetDrgRequest where
 
-data GetDrgRequest = GetDrgRequest {
-
-} deriving ( Eq, Show )
+data GetDrgRequest = GetDrgRequest
+  {
+  } deriving (Eq, Show)
 
 instance ToRequest GetDrgRequest where
-    toRequest request = error "Not defined"
-    extractQuery _ = []
-
+  toRequest request = error "Not defined"
+  extractQuery _ = []

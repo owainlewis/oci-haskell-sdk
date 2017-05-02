@@ -1,8 +1,10 @@
 import os
 
+
 SDK_LOCATION = "/home/owainlewis/Workspace/bmcs-java-sdk"
 
-TEMPLATE="""{-# LANGUAGE OverloadedStrings #-}
+
+REQUEST_TEMPLATE="""{-# LANGUAGE OverloadedStrings #-}
 
 module Network.Oracle.BMC.Core.Requests.%s where
 
@@ -23,28 +25,66 @@ instance ToRequest %s where
 
 """
 
-def get_java_files():
-    d = SDK_LOCATION + '/bmc-core/src/main/java/com/oracle/bmc/core/requests'
-    return [f for f in os.listdir(d) if f.endswith(".java")]
+
+MODEL_TEMPLATE = """
+{-# LANGUAGE OverloadedStrings #-}
+
+module Network.Oracle.BMC.Core.Model.%s
+  ( %s(..)
+  ) where
+
+import Control.Monad (mzero)
+import Data.Aeson
+
+data %s = %s { } deriving (Show)
+
+instance FromJSON %s where
+  parseJSON (Object v) = error "TODO"
+  parseJSON _ = mzero
+"""
 
 
-def generate_file(file_name):
+def java_files_in(location):
+    return [f for f in os.listdir(location) if f.endswith(".java")]
+
+
+def list_request_files():
+    location = SDK_LOCATION + \
+                '/bmc-core/src/main/java/com/oracle/bmc/core/requests'
+    return java_files_in(location)
+
+
+def list_model_files():
+    location = SDK_LOCATION + \
+               '/bmc-core/src/main/java/com/oracle/bmc/core/model'
+    return java_files_in(location)
+
+
+def equivalent_haskell_file_exists(file_name):
+    equivalent = file_name.replace("java", "hs")
+    return os.path.isfile(equivalent)
+
+
+def generate_file_in_directory(directory, file_name, template):
     tn = file_name.split('.')[0]
+    file_name = file_name.replace("java", "hs")
     print('Generating %s' % file_name)
-    with open(file_name, 'w') as f:
-        f.write(TEMPLATE % (tn, tn, tn, tn))
+    with open(directory + "/" + file_name, 'w') as f:
+        f.write(template % (tn, tn, tn, tn, tn))
 
 
-def generate_haskell_requests_from_java():
-    """ Copy all the request objects from the java SDK """
-    files = get_java_files()
+def generate_code(files, directory, template):
     for file_name in files:
-        equivalent = file_name.replace("java", "hs")
-        if not os.path.isfile(equivalent):
-            generate_file(equivalent)
+        eqe = equivalent_haskell_file_exists(directory + "/" + file_name)
+        if not eqe:
+            generate_file_in_directory(directory, file_name, template)
+
 
 def main():
-    generate_haskell_requests_from_java()
+    generate_code(list_model_files(), 
+                "src/Network/Oracle/BMC/Core/Model",
+                 MODEL_TEMPLATE)
+
 
 if __name__ == '__main__':
     main()
