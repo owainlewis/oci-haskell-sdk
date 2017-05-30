@@ -1,4 +1,4 @@
-# Oracle BMCS Haskell SDK
+# Oracle Bare Metal Cloud Haskell SDK
 
 ### Haskell SDK for Oracle Bare Metal Cloud Services.
 
