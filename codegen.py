@@ -1,8 +1,6 @@
 import os
 
-
 SDK_LOCATION = "/home/owainlewis/Workspace/bmcs-java-sdk"
-
 
 REQUEST_TEMPLATE="""{-# LANGUAGE OverloadedStrings #-}
 
