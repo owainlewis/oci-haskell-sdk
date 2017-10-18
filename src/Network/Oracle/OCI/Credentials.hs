@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Network.Oracle.OCI.Credentials
