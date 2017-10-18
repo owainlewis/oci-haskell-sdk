@@ -1,24 +1,23 @@
+{-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric #-}
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Network.Oracle.BMC.Internal.Model.Error
+-- Module      :  Network.Oracle.OCI.Internal.Model.Error
 -- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  Owain Lewis <owain@owainlewis.com>
 --
--- Common domain model for API errors returned by BMCS
+-- Common domain model for API errors returned by OCIS
 --
 -----------------------------------------------------------------------------
-module Network.Oracle.BMC.Internal.Model.APIError where
+module Network.Oracle.OCI.Internal.Model.APIError where
 
-import Control.Monad (mzero)
-import Data.Aeson
+import           Control.Monad   (mzero)
+import           Data.Aeson
 import qualified Data.ByteString as BS
-import GHC.Generics
+import           GHC.Generics
 
 data APIError = APIError
-  { code :: String
+  { code    :: String
   , message :: String
   } deriving (Eq, Generic, Show)
-  

@@ -1,9 +1,9 @@
-{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveFunctor     #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 -------------------------------------------------------------------------
 -- |
--- Module      :  Network.Oracle.BMC.Internal.Request
+-- Module      :  Network.Oracle.OCI.Internal.Request
 -- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  Owain Lewis <owain@owainlewis.com>
@@ -12,22 +12,22 @@
 -- https://tools.ietf.org/html/draft-cavage-http-signatures-05
 --
 -------------------------------------------------------------------------
-module Network.Oracle.BMC.Internal.Request
+module Network.Oracle.OCI.Internal.Request
   ( ToRequest(..)
   , transform
   ) where
 
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Char8 as C8
-import Data.CaseInsensitive (original)
-import Data.Char (toLower)
-import Data.Semigroup ((<>))
-import Data.Time
-import Network.HTTP.Client (Request(..))
-import Network.HTTP.Simple
-import Network.Oracle.BMC.Credentials
-       (Credentials, getKeyId, getKeyPath)
-import qualified Network.Oracle.BMC.Internal.Signature as Signature
+import qualified Data.ByteString                       as BS
+import qualified Data.ByteString.Char8                 as C8
+import           Data.CaseInsensitive                  (original)
+import           Data.Char                             (toLower)
+import           Data.Semigroup                        ((<>))
+import           Data.Time
+import           Network.HTTP.Client                   (Request (..))
+import           Network.HTTP.Simple
+import           Network.Oracle.OCI.Credentials        (Credentials, getKeyId,
+                                                        getKeyPath)
+import qualified Network.Oracle.OCI.Internal.Signature as Signature
 
 class ToRequest a where
   toRequest :: a -> Request

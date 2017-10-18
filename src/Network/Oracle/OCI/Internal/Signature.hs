@@ -2,7 +2,7 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      : Network.Oracle.BMC.Internal.Signature
+-- Module      : Network.Oracle.OCI.Internal.Signature
 --
 -- Maintainer  : Owain Lewis <owain@owainlewis.com>
 -- Stability   : experimental
@@ -11,23 +11,24 @@
 -- This module is used to sign strings using a private key. This functionality is
 -- required in order to implement the HTTP authentication specification
 -----------------------------------------------------------------------------
-module Network.Oracle.BMC.Internal.Signature
+module Network.Oracle.OCI.Internal.Signature
   ( signBase64
   ) where
 
-import Crypto.PubKey.OpenSsh (OpenSshPrivateKey(..), decodePrivate)
-import Crypto.Types.PubKey.RSA (PrivateKey, PublicKey)
+import           Crypto.PubKey.OpenSsh                 (OpenSshPrivateKey (..),
+                                                        decodePrivate)
+import           Crypto.Types.PubKey.RSA               (PrivateKey, PublicKey)
 
-import qualified Codec.Crypto.RSA.Pure as RSA
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Base64 as B64
-import qualified Data.ByteString.Lazy.Char8 as C
+import qualified Codec.Crypto.RSA.Pure                 as RSA
+import qualified Data.ByteString                       as BS
+import qualified Data.ByteString.Base64                as B64
+import qualified Data.ByteString.Lazy.Char8            as C
 
-import Control.Exception (throwIO)
-import Network.Oracle.BMC.Internal.Exception
-       (BMCException(..), throwLeftIO)
+import           Control.Exception                     (throwIO)
+import           Network.Oracle.OCI.Internal.Exception (OCIException (..),
+                                                        throwLeftIO)
 
-import Data.Bifunctor (bimap, second)
+import           Data.Bifunctor                        (bimap, second)
 
 loadPrivateKey :: FilePath -> IO PrivateKey
 loadPrivateKey keyPath = do

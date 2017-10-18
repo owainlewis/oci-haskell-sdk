@@ -1,8 +1,8 @@
-name:                bmcs-haskell-sdk
+name:                oci-haskell-sdk
 version:             0.1.0.0
-synopsis:            Haskell SDK for Oracle Bare Metal Cloud
+synopsis:            Haskell SDK for Oracle Cloud Infrastructure
 description:         Please see README.md
-homepage:            https://github.com/owainlewis/bmcs-haskell-sdk#readme
+homepage:            https://github.com/owainlewis/oci-haskell-sdk#readme
 license:             BSD3
 license-file:        LICENSE
 author:              Owain Lewis
@@ -15,21 +15,21 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Network.Oracle.BMC.Credentials
-                     , Network.Oracle.BMC.Internal.Dispatcher
-                     , Network.Oracle.BMC.Internal.Exception
-                     , Network.Oracle.BMC.Internal.Model.APIError
-                     , Network.Oracle.BMC.Internal.Request
-                     , Network.Oracle.BMC.Internal.Query
-                     , Network.Oracle.BMC.Internal.Signature                        
-                     , Network.Oracle.BMC.Core.Compute
-                     , Network.Oracle.BMC.Core.BlockStorage
-                     , Network.Oracle.BMC.Core.VirtualNetwork                       
-                     , Network.Oracle.BMC.Core.Model.Instance
-                     , Network.Oracle.BMC.Core.Requests.Base
-                     , Network.Oracle.BMC.Core.Requests.GetInstanceRequest
-                     , Network.Oracle.BMC.Core.Requests.ListInstancesRequest
-                     , Network.Oracle.BMC.Core.Requests.LaunchInstanceRequest                       
+  exposed-modules:     Network.Oracle.OCI.Credentials
+                     , Network.Oracle.OCI.Internal.Dispatcher
+                     , Network.Oracle.OCI.Internal.Exception
+                     , Network.Oracle.OCI.Internal.Model.APIError
+                     , Network.Oracle.OCI.Internal.Request
+                     , Network.Oracle.OCI.Internal.Query
+                     , Network.Oracle.OCI.Internal.Signature
+                     , Network.Oracle.OCI.Core.Compute
+                     , Network.Oracle.OCI.Core.BlockStorage
+                     , Network.Oracle.OCI.Core.VirtualNetwork
+                     , Network.Oracle.OCI.Core.Model.Instance
+                     , Network.Oracle.OCI.Core.Requests.Base
+                     , Network.Oracle.OCI.Core.Requests.GetInstanceRequest
+                     , Network.Oracle.OCI.Core.Requests.ListInstancesRequest
+                     , Network.Oracle.OCI.Core.Requests.LaunchInstanceRequest
   build-depends:       RSA >= 2.2.0
                      , aeson
                      , base >= 4.7 && < 5
@@ -48,17 +48,17 @@ library
                      , text
                      , time >= 1.6.0.1
   default-language:    Haskell2010
-                       
-test-suite bmcs-haskell-sdk-test
+
+test-suite oci-haskell-sdk-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
   build-depends:       base
                      , hspec
-                     , bmcs-haskell-sdk
+                     , oci-haskell-sdk
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
 
 source-repository head
   type:     git
-  location: https://github.com/owainlewis/bmcs-haskell-sdk
+  location: https://github.com/owainlewis/oci-haskell-sdk

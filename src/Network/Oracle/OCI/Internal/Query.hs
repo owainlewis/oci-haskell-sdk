@@ -1,7 +1,7 @@
-{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveFunctor     #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Network.Oracle.BMC.Internal.Query
+module Network.Oracle.OCI.Internal.Query
   ( Path(..)
   , Query(..)
   , unPath
@@ -10,7 +10,7 @@ module Network.Oracle.BMC.Internal.Query
   , intQueryToByteString
   ) where
 
-import Data.ByteString (ByteString)
+import           Data.ByteString       (ByteString)
 import qualified Data.ByteString.Char8 as C8
 
 -------------------------------------------------------------------------

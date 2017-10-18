@@ -2,7 +2,7 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Network.Oracle.BMC.Credentials
+-- Module      :  Network.Oracle.OCI.Credentials
 -- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  Owain Lewis <owain@owainlewis.com>
@@ -10,7 +10,7 @@
 -- This module defines readers and types for Oracle Bare Metal Cloud credentials
 --
 -----------------------------------------------------------------------------
-module Network.Oracle.BMC.Credentials
+module Network.Oracle.OCI.Credentials
   ( Credentials(..)
   , CredentialsProvider
   , configFileCredentialsProvider
@@ -19,22 +19,23 @@ module Network.Oracle.BMC.Credentials
   , getKeyPath
   ) where
 
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as Encoding
-import qualified Data.Text.IO as TIO
+import qualified Data.Text                             as T
+import qualified Data.Text.Encoding                    as Encoding
+import qualified Data.Text.IO                          as TIO
 
-import Network.Oracle.BMC.Internal.Exception
-       (throwLeftIO, BMCException(..))
+import           Network.Oracle.OCI.Internal.Exception (OCIException (..),
+                                                        throwLeftIO)
 
-import Control.Applicative ((<$>))
-import Control.Exception
-import Data.Ini (Ini, lookupValue, parseIni)
-import Data.Semigroup ((<>))
-import System.Environment (getEnv)
+import           Control.Applicative                   ((<$>))
+import           Control.Exception
+import           Data.Ini                              (Ini, lookupValue,
+                                                        parseIni)
+import           Data.Semigroup                        ((<>))
+import           System.Environment                    (getEnv)
 
-import System.Directory (getHomeDirectory)
+import           System.Directory                      (getHomeDirectory)
 
-import qualified Data.ByteString as BS
+import qualified Data.ByteString                       as BS
 
 type CredentialError = String
 
@@ -49,39 +50,40 @@ expandPath p = do
   return $
     case p of
       ('~':t) -> home ++ t
-      _ -> p
+      _       -> p
 
 data Credentials = Credentials
-  { user :: T.Text -- User OCID
+  { user        :: T.Text -- User OCID
   , fingerprint :: T.Text -- Fingerprint of private SSH key
-  , key :: T.Text -- Raw private SSH key contents
-  , tenancy :: T.Text -- Tenancy OCID
+  , key         :: T.Text -- Raw private SSH key contents
+  , tenancy     :: T.Text -- Tenancy OCID
   } deriving (Eq, Read, Show)
 
 -- | Extract a credentials object
 --
-parseBMCCredentials :: T.Text -> Ini -> Either CredentialError Credentials
-parseBMCCredentials key ini = do
+parseOCICredentials :: T.Text -> Ini -> Either CredentialError Credentials
+parseOCICredentials key ini = do
   user <- lookupValue key "user" ini
   fingerprint <- lookupValue key "fingerprint" ini
   keyFile <- lookupValue key "key_file" ini
   tenancy <- lookupValue key "tenancy" ini
   return $ Credentials user fingerprint keyFile tenancy
 
-configFileBMCSCredentialsProvider :: FilePath
+configFileOCISCredentialsProvider :: FilePath
                                   -> T.Text
                                   -> IO (Either String Credentials)
-configFileBMCSCredentialsProvider path key = do
+configFileOCISCredentialsProvider path key = do
   contents <- TIO.readFile path
-  return $ (parseIni contents) >>= (parseBMCCredentials key)
+  return $ (parseIni contents) >>= (parseOCICredentials key)
 
 -- Load credentials from file. This also expands the user home path
---
-configFileCredentialsProvider :: FilePath -> T.Text -> IO Credentials
-configFileCredentialsProvider path key =
+-- Will throw an exception is the config path is invalid and a file
+-- does not exist
+unsafeConfigFileCredentialsProvider :: FilePath -> T.Text -> IO Credentials
+unsafeConfigFileCredentialsProvider path key =
   let eitherCredentials = do
         expandedPath <- expandPath path
-        creds <- configFileBMCSCredentialsProvider expandedPath key
+        creds <- configFileOCISCredentialsProvider expandedPath key
         case creds of
           Left e -> return . Left $ InvalidCredentialsException e
           Right (Credentials u f k t) -> do
@@ -89,14 +91,17 @@ configFileCredentialsProvider path key =
             return . Right $ Credentials u f (T.pack expandedKeyPath) t
   in throwLeftIO eitherCredentials
 
+configFileCredentialsProvider :: FilePath -> T.Text -> IO Credentials
+configFileCredentialsProvider = unsafeConfigFileCredentialsProvider
+
 -- | Handler for the most common case where credentials are stored in the default location
 --   with the default profile
 --
 defaultCredentialsProvider :: IO Credentials
 defaultCredentialsProvider =
-  configFileCredentialsProvider "~/.oraclebmc/config" "DEFAULT"
+  configFileCredentialsProvider "~/.oci/config" "DEFAULT"
 
--- | Generate the keyId from a set of credentials. A BMCS key takes the form
+-- | Generate the keyId from a set of credentials. A OCI key takes the form
 --
 -- >> <TENANCY OCID>/<USER OCID>/<KEY FINGERPRINT>
 --

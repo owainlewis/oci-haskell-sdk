@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Network.Oracle.BMC.Internal.Dispatcher
+-- Module      :  Network.Oracle.OCI.Internal.Dispatcher
 -- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  Owain Lewis <owain@owainlewis.com>
@@ -9,38 +9,40 @@
 -- authentication information.
 --
 -----------------------------------------------------------------------------
-module Network.Oracle.BMC.Internal.Dispatcher
+module Network.Oracle.OCI.Internal.Dispatcher
   ( runRequest
   , runRequestRaw
-  , BMCAPIResponse
+  , OCIAPIResponse
   ) where
 
-import Data.Aeson (FromJSON, decode)
-import Network.HTTP.Client (Response, responseStatus, responseBody)
-import Network.HTTP.Simple (httpLBS)
-import Network.HTTP.Types.Status (statusCode)
-import Network.Oracle.BMC.Credentials
-import Network.Oracle.BMC.Internal.Exception (BMCException(..))
-import Network.Oracle.BMC.Internal.Model.APIError
-import Network.Oracle.BMC.Internal.Request
+import           Data.Aeson                                 (FromJSON, decode)
+import           Network.HTTP.Client                        (Response,
+                                                             responseBody,
+                                                             responseStatus)
+import           Network.HTTP.Simple                        (httpLBS)
+import           Network.HTTP.Types.Status                  (statusCode)
+import           Network.Oracle.OCI.Credentials
+import           Network.Oracle.OCI.Internal.Exception      (OCIException (..))
+import           Network.Oracle.OCI.Internal.Model.APIError
+import           Network.Oracle.OCI.Internal.Request
 
-import qualified Data.ByteString.Lazy as LBS
+import qualified Data.ByteString.Lazy                       as LBS
 
-import Control.Exception (throwIO)
+import           Control.Exception                          (throwIO)
 
-type BMCAPIResponse a = IO (Either APIError a)
+type OCIAPIResponse a = IO (Either APIError a)
 
 ----------------------------------------------------------------------
 throwEitherMaybe :: IO (Either (Maybe a) (Maybe b)) -> IO (Either a b)
 throwEitherMaybe ioEither = do
   result <- ioEither
   case result of
-    Left me -> throwMaybe Left me
+    Left me  -> throwMaybe Left me
     Right ma -> throwMaybe Right ma
   where
     throwMaybe f ma =
       case ma of
-        Just x -> return (f x)
+        Just x  -> return (f x)
         Nothing -> throwIO (JSONParseException)
 
 runRequestMaybe
@@ -60,7 +62,7 @@ runRequestMaybe credentialsProvider request = do
 --   or a valid Aeson response
 runRequest
   :: (ToRequest a, FromJSON b)
-  => IO Credentials -> a -> BMCAPIResponse b
+  => IO Credentials -> a -> OCIAPIResponse b
 runRequest credentialsProvider request =
   throwEitherMaybe (runRequestMaybe credentialsProvider request)
 

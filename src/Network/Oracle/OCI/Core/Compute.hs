@@ -2,32 +2,32 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Network.Oracle.BMC.Core.Compute
+-- Module      :  Network.Oracle.OCI.Core.Compute
 -- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  Owain Lewis <owain@owainlewis.com>
 --
--- A high level client for the Oracle BMCS compute services
+-- A high level client for the Oracle OCIS compute services
 --
 -----------------------------------------------------------------------------
-module Network.Oracle.BMC.Core.Compute
+module Network.Oracle.OCI.Core.Compute
   ( getInstance
   , listInstances
   ) where
 
-import Network.Oracle.BMC.Core.Model.Instance
-import Network.Oracle.BMC.Core.Requests.GetInstanceRequest
-import Network.Oracle.BMC.Core.Requests.LaunchInstanceRequest
-import Network.Oracle.BMC.Core.Requests.ListInstancesRequest
-import Network.Oracle.BMC.Credentials
-import Network.Oracle.BMC.Internal.Dispatcher
+import           Network.Oracle.OCI.Core.Model.Instance
+import           Network.Oracle.OCI.Core.Requests.GetInstanceRequest
+import           Network.Oracle.OCI.Core.Requests.LaunchInstanceRequest
+import           Network.Oracle.OCI.Core.Requests.ListInstancesRequest
+import           Network.Oracle.OCI.Credentials
+import           Network.Oracle.OCI.Internal.Dispatcher
 
 ---------------------------------------------------------------------
 -- Instances
 ---------------------------------------------------------------------
 getInstance :: CredentialsProvider
             -> GetInstanceRequest
-            -> BMCAPIResponse Instance
+            -> OCIAPIResponse Instance
 getInstance = runRequest
 
 -- | List instances
@@ -37,7 +37,7 @@ getInstance = runRequest
 -- @
 listInstances :: CredentialsProvider
               -> ListInstancesRequest
-              -> BMCAPIResponse [Instance]
+              -> OCIAPIResponse [Instance]
 listInstances = runRequest
 
 launchExample =
