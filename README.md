@@ -1,8 +1,16 @@
-# BMCS Haskell SDK
+# OCI Haskell SDK
 
-### Haskell SDK for Oracle Bare Metal Cloud Services.
+### Haskell SDK for Oracle Cloud Infrastructure
 
 This library provides a Haskell interface for working with the Oracle Bare Metal Cloud
+
+## Notes
+
+Signature 
+
+```
+echo "Hello, World" | openssl dgst -sha256 -sign oci_api_key.pem | openssl enc -e -base64 | tr -d '\n'
+```
 
 ### Supported services
 
