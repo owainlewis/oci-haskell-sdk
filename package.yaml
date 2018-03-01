@@ -13,9 +13,20 @@ extra-source-files:
 description: Please see the README on Github at <https://github.com/owainlewis/oci-haskell-sdk#readme>
 dependencies:
 - base >= 4.7 && < 5
+- aeson
+- bytestring
+- http-client
+- http-client-tls
+- http-types
+- ini
+- text
+- time
+- directory
 
 library:
   source-dirs: src
+  exposed-modules:
+    - Network.Oracle.OCI.Common.Configuration
 
 tests:
   oci-hs-sdk-test:
@@ -26,4 +37,5 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
+    - hspec
     - oci-haskell-sdk

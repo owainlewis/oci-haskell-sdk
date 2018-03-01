@@ -1,64 +1,71 @@
-name:                oci-haskell-sdk
-version:             0.1.0.0
-synopsis:            Haskell SDK for Oracle Cloud Infrastructure
-description:         Please see README.md
-homepage:            https://github.com/owainlewis/oci-haskell-sdk#readme
-license:             BSD3
-license-file:        LICENSE
-author:              Owain Lewis
-maintainer:          owain@owainlewis.com
-copyright:           2017 Owain Lewis
-category:            Network
-build-type:          Simple
-extra-source-files:  README.md
-cabal-version:       >=1.10
+-- This file has been generated from package.yaml by hpack version 0.20.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: a60b4a6b8009f8ca7b83c34689b65cc26e9a4a9769c79cdc41d652344c86fec5
 
-library
-  hs-source-dirs:      src
-  exposed-modules:     Network.Oracle.OCI.Credentials
-                     , Network.Oracle.OCI.Internal.Dispatcher
-                     , Network.Oracle.OCI.Internal.Exception
-                     , Network.Oracle.OCI.Internal.Model.APIError
-                     , Network.Oracle.OCI.Internal.Request
-                     , Network.Oracle.OCI.Internal.Query
-                     , Network.Oracle.OCI.Internal.Signature
-                     , Network.Oracle.OCI.Core.Compute
-                     , Network.Oracle.OCI.Core.BlockStorage
-                     , Network.Oracle.OCI.Core.VirtualNetwork
-                     , Network.Oracle.OCI.Core.Model.Instance
-                     , Network.Oracle.OCI.Core.Requests.Base
-                     , Network.Oracle.OCI.Core.Requests.GetInstanceRequest
-                     , Network.Oracle.OCI.Core.Requests.ListInstancesRequest
-                     , Network.Oracle.OCI.Core.Requests.LaunchInstanceRequest
-  build-depends:       RSA >= 2.2.0
-                     , aeson
-                     , base >= 4.7 && < 5
-                     , base64-bytestring >= 1.0.0.1
-                     , bytestring >= 0.10.8.1
-                     , case-insensitive >= 1.2.0.8
-                     , containers >= 0.5.7.1
-                     , crypto-pubkey-openssh
-                     , crypto-pubkey-types >= 0.4.3
-                     , directory >= 1.3.0.0
-                     , http-client
-                     , http-conduit
-                     , http-types >= 0.9.1
-                     , ini >= 0.3.5
-                     , network-uri >= 2.6.1.0
-                     , text
-                     , time >= 1.6.0.1
-  default-language:    Haskell2010
+name:           oci-haskell-sdk
+version:        0.1.0.0
+description:    Please see the README on Github at <https://github.com/owainlewis/oci-haskell-sdk#readme>
+homepage:       https://github.com/owainlewis/oci-hs-sdk#readme
+bug-reports:    https://github.com/owainlewis/oci-hs-sdk/issues
+author:         Owain Lewis
+maintainer:     Owain Lewis <owain.lewis@oracle.com>
+copyright:      2018 Owain Lewis
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+cabal-version:  >= 1.10
 
-test-suite oci-haskell-sdk-test
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      test
-  main-is:             Spec.hs
-  build-depends:       base
-                     , hspec
-                     , oci-haskell-sdk
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  default-language:    Haskell2010
+extra-source-files:
+    ChangeLog.md
+    README.md
 
 source-repository head
-  type:     git
-  location: https://github.com/owainlewis/oci-haskell-sdk
+  type: git
+  location: https://github.com/owainlewis/oci-hs-sdk
+
+library
+  hs-source-dirs:
+      src
+  build-depends:
+      aeson
+    , base >=4.7 && <5
+    , bytestring
+    , directory
+    , http-client
+    , http-client-tls
+    , http-types
+    , ini
+    , text
+    , time
+  exposed-modules:
+      Network.Oracle.OCI.Common.Configuration
+  other-modules:
+      Network.Oracle.OCI
+      Paths_oci_haskell_sdk
+  default-language: Haskell2010
+
+test-suite oci-hs-sdk-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aeson
+    , base >=4.7 && <5
+    , bytestring
+    , directory
+    , hspec
+    , http-client
+    , http-client-tls
+    , http-types
+    , ini
+    , oci-haskell-sdk
+    , text
+    , time
+  other-modules:
+      Network.Oracle.OCI.Common.CredentialsSpec
+      Paths_oci_haskell_sdk
+  default-language: Haskell2010
