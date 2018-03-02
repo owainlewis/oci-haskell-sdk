@@ -4,7 +4,7 @@ module Network.Oracle.OCI.Common.CredentialsSpec
   , spec
   ) where
 
-import           Network.Oracle.OCI.Common.Credentials
+import           Network.Oracle.OCI.Common.Configuration
 import           Test.Hspec
 
 main :: IO ()
@@ -12,6 +12,6 @@ main = hspec spec
 
 spec :: Spec
 spec = do
-  describe "parseValidConfig" $ do
-    it "should return a credentials object" $ do
-      "" `shouldEqual` ""
+  describe "Parsing configuration" $ do
+    it "returns the right answer" $ do
+      10 `shouldBe` (10 :: Int)

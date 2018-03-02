@@ -22,7 +22,7 @@ import qualified Data.ByteString.Char8                 as C8
 import           Data.CaseInsensitive                  (original)
 import           Data.Char                             (toLower)
 import           Data.Semigroup                        ((<>))
-import           Data.Time
+import           Data.Time:
 import           Network.HTTP.Client                   (Request (..))
 import           Network.HTTP.Simple
 import           Network.Oracle.OCI.Credentials        (Credentials, getKeyId,

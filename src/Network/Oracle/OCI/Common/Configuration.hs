@@ -34,8 +34,6 @@ lookupMaybe k v ini =
     Left e  -> Right Nothing
     Right v -> Right (Just v)
 
--- | Extract a credentials object
---
 parseIniCredentials :: T.Text -> Ini -> Either String Credentials
 parseIniCredentials key ini = do
   user <- lookupValue key "user" ini
@@ -46,7 +44,12 @@ parseIniCredentials key ini = do
   passphrase <- lookupMaybe key "passphrase" ini
   return $ Credentials user tenancy region keyFile fingerprint passphrase
 
-parseCredentials :: T.Text -> T.Text -> Either String Credentials
+parseCredentials :: T.Text
+  -> T.Text
+  -> Either String Credentials
 parseCredentials contents section = parseIni contents >>= (parseIniCredentials section)
 
+readCredentialsFromFile :: FilePath
+  -> T.Text
+  -> IO (Either String Credentials)
 readCredentialsFromFile filePath section = flip parseCredentials section <$> TIO.readFile filePath

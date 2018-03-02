@@ -27,7 +27,7 @@ dependencies:
 library:
   source-dirs: src
   exposed-modules:
-    - Network.Oracle.OCI.Common.Configuration
+  - Network.Oracle.OCI.Common.Configuration
 
 tests:
   oci-hs-sdk-test:
