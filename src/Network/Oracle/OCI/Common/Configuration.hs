@@ -2,6 +2,8 @@
 module Network.Oracle.OCI.Common.Configuration
   ( Credentials(..)
   , KeyProvider
+  , parseCredentials
+  , readCredentialsFromFile
   ) where
 
 import qualified Data.ByteString as BS
@@ -46,3 +48,5 @@ parseIniCredentials key ini = do
 
 parseCredentials :: T.Text -> T.Text -> Either String Credentials
 parseCredentials contents section = parseIni contents >>= (parseIniCredentials section)
+
+readCredentialsFromFile filePath section = flip parseCredentials section <$> TIO.readFile filePath
