@@ -7,12 +7,15 @@ module Network.Oracle.OCI.Common.Configuration
   , readCredentialsFromFile
   ) where
 
-import qualified Data.ByteString as BS
-import           Data.Monoid     ((<>))
-import qualified Data.Text       as T
+import qualified Data.ByteString   as BS
+import           Data.Monoid       ((<>))
+import qualified Data.Text         as T
 
-import           Data.Ini        (Ini, lookupValue, parseIni)
-import qualified Data.Text.IO    as TIO
+import qualified Control.Exception as E
+import           Data.Ini          (Ini, lookupValue, parseIni)
+import qualified Data.Text.IO      as TIO
+
+import           Data.Typeable     (Typeable)
 
 type KeyID = T.Text
 
@@ -52,7 +55,16 @@ parseCredentials :: T.Text
   -> Either String Credentials
 parseCredentials contents section = parseIni contents >>= (parseIniCredentials section)
 
+data CredentialsException = CredentialsException String
+    deriving (Show, Typeable)
+
+instance E.Exception CredentialsException
+
 readCredentialsFromFile :: FilePath
   -> T.Text
-  -> IO (Either String Credentials)
-readCredentialsFromFile filePath section = flip parseCredentials section <$> TIO.readFile filePath
+  -> IO Credentials
+readCredentialsFromFile filePath section = do
+    result <- flip parseCredentials section <$> TIO.readFile filePath
+    case result of
+      Left e            -> E.throwIO (CredentialsException . show $ e)
+      Right credentials -> return credentials

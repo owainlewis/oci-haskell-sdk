@@ -7,10 +7,11 @@ module Network.Oracle.OCI.Common.OpenSSL
 import qualified Control.Exception     as E
 import qualified Data.ByteString       as BS
 import qualified Data.ByteString.Char8 as C8
+import           Data.Typeable         (Typeable)
 import           System.Process        (readCreateProcessWithExitCode, shell)
 
-data OCISDKException = SignException String
-    deriving Show
+data OCISDKException = RequestSignException String
+    deriving (Show, Typeable)
 
 instance E.Exception OCISDKException
 
@@ -22,4 +23,4 @@ signWithPrivateKey privateKeyPath input =
     in do
       (_, stdin, stderr) <- readCreateProcessWithExitCode (shell cmd) []
       if stderr == "" then return (C8.pack stdin)
-                      else E.throw (SignException stderr)
+                      else E.throwIO (RequestSignException stderr)
