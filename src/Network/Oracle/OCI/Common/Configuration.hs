@@ -2,6 +2,7 @@
 module Network.Oracle.OCI.Common.Configuration
   ( Credentials(..)
   , KeyProvider
+  , KeyID
   , parseCredentials
   , readCredentialsFromFile
   ) where
@@ -13,8 +14,10 @@ import qualified Data.Text       as T
 import           Data.Ini        (Ini, lookupValue, parseIni)
 import qualified Data.Text.IO    as TIO
 
+type KeyID = T.Text
+
 class KeyProvider a where
-  keyID :: a -> T.Text
+  keyID :: a -> KeyID
 
 data Credentials = Credentials
   { user        :: T.Text
