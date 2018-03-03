@@ -1,19 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections     #-}
-module Network.Oracle.HTTP.Signer ( signRequest ) where
+module Network.Oracle.OCI.Common.Signer ( signRequest ) where
 
-import qualified Data.ByteString             as BS
-import qualified Data.ByteString.Char8       as C8
-import           Data.CaseInsensitive        (original)
-import           Data.Char                   (toLower)
-import           Data.Monoid                 ((<>))
-import qualified Data.Text                   as T
+import qualified Data.ByteString                   as BS
+import qualified Data.ByteString.Char8             as C8
+import           Data.CaseInsensitive              (original)
+import           Data.Char                         (toLower)
+import           Data.Monoid                       ((<>))
+import qualified Data.Text                         as T
 import           Data.Time
-import qualified Network.HTTP.Client         as H
+import qualified Network.HTTP.Client               as H
 import           Network.HTTP.Simple
-import qualified Network.HTTP.Types          as H
+import qualified Network.HTTP.Types                as H
 
-import qualified Network.Oracle.HTTP.OpenSSL as OpenSSL
+import qualified Network.Oracle.OCI.Common.OpenSSL as OpenSSL
 
 type HeaderTransformer = H.Request -> IO H.Request
 

@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1198fe817062ff469055c6d0ca2dc68216514ce4d97810373ef8ee6fac36f3d3
+-- hash: 04e03c4a779390e5823f79731555c876c359b74f080a5565bafc83e94551678c
 
 name:           oci-haskell-sdk
 version:        0.1.0.0
@@ -45,9 +45,9 @@ library
   exposed-modules:
       Network.Oracle.OCI.Common.Configuration
   other-modules:
-      Network.HTTP.OpenSSL
-      Network.HTTP.Signer
       Network.Oracle.OCI
+      Network.Oracle.OCI.Common.OpenSSL
+      Network.Oracle.OCI.Common.Signer
       Paths_oci_haskell_sdk
   default-language: Haskell2010
 
