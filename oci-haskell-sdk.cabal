@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 59473288f19ee53b82d579bd6f75c18c8a1ce626213952a7f2576ec689444e1f
+-- hash: ca4aacbb4eeb9f7df2d9a77a901be9b451425a81e0381c51926acb160aad8171
 
 name:           oci-haskell-sdk
 version:        0.1.0.0
@@ -32,6 +32,7 @@ library
       aeson
     , base >=4.7 && <5
     , bytestring
+    , case-insensitive
     , directory
     , http-client
     , http-client-tls
@@ -59,6 +60,7 @@ test-suite oci-hs-sdk-test
       aeson
     , base >=4.7 && <5
     , bytestring
+    , case-insensitive
     , directory
     , hspec
     , http-client

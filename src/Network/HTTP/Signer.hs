@@ -4,8 +4,9 @@ module Network.HTTP.Signer
   ( signWithPrivateKey
   ) where
 
-import qualified Data.ByteString       as S
+import qualified Data.ByteString       as BS
 import qualified Data.ByteString.Char8 as C8
+import           Data.CaseInsensitive  (original)
 import           Data.Char             (toLower)
 import           Data.Monoid           ((<>))
 import qualified Data.Text             as T
@@ -18,6 +19,13 @@ import           Network.HTTP.Simple
 
 import           Control.Arrow
 
+
+defaultGenericHeaders :: [BS.ByteString]
+defaultGenericHeaders = ["date", "(request-target)", "host"]
+
+defaultBodyHeaders :: [BS.ByteString]
+defaultBodyHeaders = ["content-length", "content-type", "x-content-sha256"]
+
 doRequest :: H.Request -> IO Int
 doRequest request = do
   response <- httpLBS request
@@ -25,15 +33,14 @@ doRequest request = do
 
 demoRequest :: H.Request
 demoRequest =
-        setRequestHost "https://identity.us-ashburn-1.oraclecloud.com"
+        setRequestHost "identity.us-ashburn-1.oraclecloud.com"
       $ setRequestPath "/20160918/compartments"
-      $ setRequestQueryString [("compartmentId", Just "ocid1.tenancy.oc1..aaaaaaaatyn7scrtwtqedvgrxgr2xunzeo6uanvyhzxqblctwkrpisvke4kq")]
       $ setRequestSecure True
       $ setRequestPort 443
+      $ setRequestQueryString [("compartmentId", Just "ocid1.tenancy.oc1..aaaaaaaatyn7scrtwtqedvgrxgr2xunzeo6uanvyhzxqblctwkrpisvke4kq")]
       $ defaultRequest
 
 example = doRequest demoRequest
-
 
 -- | Sign an input string using open SSL and the private key supplied
 --
@@ -46,7 +53,7 @@ signWithPrivateKey privateKeyPath input =
                       else return . Left . T.pack $ stderr
 
 -- | Adapted from Network.HTTP.Simple
-setOneRequestHeader :: H.HeaderName -> S.ByteString -> H.Request -> H.Request
+setOneRequestHeader :: H.HeaderName -> BS.ByteString -> H.Request -> H.Request
 setOneRequestHeader name val req =
     req { H.requestHeaders = filter (\(x, _) -> x /= name) (H.requestHeaders req) ++ [(name, val)] }
 
@@ -76,3 +83,35 @@ addDateHeader request = do
 
 addDefaultHeaders :: Request -> IO Request
 addDefaultHeaders request = addDateHeader request >>= addHostHeader >>= addRequestTargetHeader
+
+computeSignature :: Request -> BS.ByteString
+computeSignature request = BS.intercalate "\n" hdrs
+  where
+    hdrs = map (\(k, v) -> original k <> ": " <> v) (H.requestHeaders request)
+
+-- TODO addSignedRequestSignature
+base64EncodedRequestSignature :: Request -> IO BS.ByteString
+base64EncodedRequestSignature request = do
+  let signature = computeSignature request
+  return signature
+
+zipHeaderPairs :: [(BS.ByteString, BS.ByteString)] -> BS.ByteString
+zipHeaderPairs pairs = BS.intercalate "," $ map f pairs
+  where
+    f = (\(k, v) -> k <> "=\"" <> v <> "\"")
+
+addAuthHeader :: Request -> BS.ByteString -> IO Request
+addAuthHeader request keyId =
+  let headers = (BS.intercalate " ") . map (original . fst) . H.requestHeaders in do
+  signature <- base64EncodedRequestSignature request
+  let requestSignature = zipHeaderPairs [ ("headers", headers request)
+                                        , ("keyId", keyId)
+                                        , ("algorithm", "rsa-sha256")
+                                        , ("signature", signature)
+                                        ]
+  return $ setRequestHeader "authorization" ["Signature " <> requestSignature] request
+
+signRequest :: Request -> IO Request
+signRequest req = do
+  req' <- addDefaultHeaders req >>= (flip addAuthHeader "foo/bar/baz")
+  return req'
