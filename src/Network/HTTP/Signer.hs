@@ -12,13 +12,11 @@ import           Data.Monoid           ((<>))
 import qualified Data.Text             as T
 import           Data.Time
 import qualified Network.HTTP.Client   as H
+import           Network.HTTP.Simple
 import qualified Network.HTTP.Types    as H
 import           System.Process
 
-import           Network.HTTP.Simple
-
-import           Control.Arrow
-
+import qualified Control.Exception     as E
 
 defaultGenericHeaders :: [BS.ByteString]
 defaultGenericHeaders = ["date", "(request-target)", "host"]
@@ -40,17 +38,20 @@ demoRequest =
       $ setRequestQueryString [("compartmentId", Just "ocid1.tenancy.oc1..aaaaaaaatyn7scrtwtqedvgrxgr2xunzeo6uanvyhzxqblctwkrpisvke4kq")]
       $ defaultRequest
 
-example = doRequest demoRequest
+data OCISDKException = SignException String
+    deriving Show
+
+instance E.Exception OCISDKException
 
 -- | Sign an input string using open SSL and the private key supplied
 --
-signWithPrivateKey :: T.Text -> T.Text -> IO (Either T.Text T.Text)
+signWithPrivateKey :: String -> String -> IO BS.ByteString
 signWithPrivateKey privateKeyPath input =
-    let cmd = mconcat ["echo ", input, " | openssl dgst -sha256 -sign ", privateKeyPath, " | openssl enc -e -base64 | tr -d '\n'"]
+    let cmd = concat ["echo \"", input, "\" | openssl dgst -sha256 -sign ", privateKeyPath, " | openssl enc -e -base64 | tr -d '\n'"]
     in do
-      (_, stdin, stderr) <- readCreateProcessWithExitCode (shell . T.unpack $ cmd) []
-      if stderr == "" then return . Right . T.pack $ stdin
-                      else return . Left . T.pack $ stderr
+      (_, stdin, stderr) <- readCreateProcessWithExitCode (shell cmd) []
+      if stderr == "" then return (C8.pack stdin)
+                      else E.throw (SignException stderr)
 
 -- | Adapted from Network.HTTP.Simple
 setOneRequestHeader :: H.HeaderName -> BS.ByteString -> H.Request -> H.Request
@@ -93,7 +94,7 @@ computeSignature request = BS.intercalate "\n" hdrs
 base64EncodedRequestSignature :: Request -> IO BS.ByteString
 base64EncodedRequestSignature request = do
   let signature = computeSignature request
-  return signature
+  signWithPrivateKey "/Users/owainlewis/.oci/oci_api_key.pem" (C8.unpack signature)
 
 zipHeaderPairs :: [(BS.ByteString, BS.ByteString)] -> BS.ByteString
 zipHeaderPairs pairs = BS.intercalate "," $ map f pairs
@@ -111,7 +112,7 @@ addAuthHeader request keyId =
                                         ]
   return $ setRequestHeader "authorization" ["Signature " <> requestSignature] request
 
-signRequest :: Request -> IO Request
+--signRequest :: Request -> IO Request
 signRequest req = do
   req' <- addDefaultHeaders req >>= (flip addAuthHeader "foo/bar/baz")
-  return req'
+  doRequest req'
