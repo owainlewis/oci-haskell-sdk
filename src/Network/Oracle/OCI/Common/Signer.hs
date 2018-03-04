@@ -55,13 +55,9 @@ addRequestTargetHeader request =
     lowerCaseBS = C8.pack . map toLower . C8.unpack
     target = rMethod <> " " <> (H.path request) <> (H.queryString request)
 
--- | Add a host header to a request. This is needed by all requests
---
 addHostHeader :: HeaderTransformer
 addHostHeader request = pure (setRequestHeader "host" [H.host request] request)
 
--- | Add a date header to a request. This is needed by all requests
---
 addDateHeader :: HeaderTransformer
 addDateHeader request = do
   now <-
@@ -69,12 +65,9 @@ addDateHeader request = do
     getCurrentTime
   return $ setRequestHeader "date" [now] request
 
--- Add the default required headers for all requests. This is enough for GET and DELETE requests
---
 addDefaultHeaders :: Request -> IO Request
 addDefaultHeaders request = addDateHeader request >>= addHostHeader >>= addRequestTargetHeader
 
--- | Compute the HTTP request signature
 computeSignature :: Request -> BS.ByteString
 computeSignature request = BS.intercalate "\n" hdrs
   where
@@ -119,8 +112,6 @@ signRequest req = do
 signAndDispatchRequest req = do
   req' <- signRequest req
   httpLBS req'
-
---------------------------------------------------
 
 doRequest :: H.Request -> IO Int
 doRequest request = do
