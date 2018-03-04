@@ -15,11 +15,14 @@ data OCISDKException = RequestSignException String
 
 instance E.Exception OCISDKException
 
+quoted :: String -> String
+quoted s = "\"" ++ s ++ "\""
+
 -- | Sign an input string using open SSL and the private key supplied
 --
 signWithPrivateKey :: String -> String -> IO BS.ByteString
 signWithPrivateKey privateKeyPath input =
-    let cmd = concat ["echo \"", input, "\" | openssl dgst -sha256 -sign ", privateKeyPath, " | openssl enc -e -base64 | tr -d '\n'"]
+    let cmd = concat ["printf '%b' ", quoted input, " | openssl dgst -sha256 -sign ", privateKeyPath, " | openssl enc -e -base64 | tr -d '\n'"]
     in do
       (_, stdin, stderr) <- readCreateProcessWithExitCode (shell cmd) []
       if stderr == "" then return (C8.pack stdin)

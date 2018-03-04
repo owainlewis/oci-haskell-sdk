@@ -30,6 +30,7 @@ library:
   source-dirs: src
   exposed-modules:
   - Network.Oracle.OCI.Common.Configuration
+  - Network.Oracle.OCI.Common.Signer
 
 tests:
   oci-hs-sdk-test:
