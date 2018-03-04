@@ -1,5 +1,23 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TupleSections     #-}
+------------------------------------------------------------------------------
+--- |
+--- Module      :  Network.Oracle.OCI.Common.Signer
+--- License     :  BSD-style (see the file LICENSE)
+---
+--- Maintainer  :  Owain Lewis <owain.lewis@oracle.com>
+---
+--- This module will perform the signing of all HTTP requests.
+---
+--- For more information see:
+---   1. https://tools.ietf.org/html/draft-cavage-http-signatures-08
+---   2. https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/signingrequests.htm
+---
+--- In general, these are the steps required to sign a request:
+---   1. Form the HTTPS request (SSL protocol TLS 1.2 is required).
+---   2. Create the signing string, which is based on parts of the request.
+---   3. Create the signature from the signing string, using your private key and the RSA-SHA256 algorithm.
+---   4. Add the resulting signature and other required information to the Authorization header in the request.
+------------------------------------------------------------------------------
 module Network.Oracle.OCI.Common.Signer
   ( signRequest
   , computeSignature
@@ -16,7 +34,7 @@ import qualified Network.HTTP.Client                     as H
 import           Network.HTTP.Simple
 import qualified Network.HTTP.Types                      as H
 
-import qualified Network.Oracle.OCI.Common.Configuration as Configuration
+import           Network.Oracle.OCI.Common.Configuration (Configuration)
 import qualified Network.Oracle.OCI.Common.OpenSSL       as OpenSSL
 
 type HeaderTransformer = H.Request -> IO H.Request
@@ -27,6 +45,8 @@ defaultGenericHeaders = ["date", "(request-target)", "host"]
 defaultBodyHeaders :: [BS.ByteString]
 defaultBodyHeaders = ["content-length", "content-type", "x-content-sha256"]
 
+-- | Add a request target header to a request. This is needed by all requests
+--
 addRequestTargetHeader :: HeaderTransformer
 addRequestTargetHeader request =
   pure $ setRequestHeader "(request-target)" [target] request
@@ -35,9 +55,13 @@ addRequestTargetHeader request =
     lowerCaseBS = C8.pack . map toLower . C8.unpack
     target = rMethod <> " " <> (H.path request) <> (H.queryString request)
 
+-- | Add a host header to a request. This is needed by all requests
+--
 addHostHeader :: HeaderTransformer
 addHostHeader request = pure (setRequestHeader "host" [H.host request] request)
 
+-- | Add a date header to a request. This is needed by all requests
+--
 addDateHeader :: HeaderTransformer
 addDateHeader request = do
   now <-
@@ -45,9 +69,12 @@ addDateHeader request = do
     getCurrentTime
   return $ setRequestHeader "date" [now] request
 
+-- Add the default required headers for all requests. This is enough for GET and DELETE requests
+--
 addDefaultHeaders :: Request -> IO Request
 addDefaultHeaders request = addDateHeader request >>= addHostHeader >>= addRequestTargetHeader
 
+-- | Compute the HTTP request signature
 computeSignature :: Request -> BS.ByteString
 computeSignature request = BS.intercalate "\n" hdrs
   where
@@ -59,9 +86,7 @@ base64EncodedRequestSignature request = do
   OpenSSL.signWithPrivateKey "/Users/owainlewis/.oci/oci_api_key.pem" (C8.unpack signature)
 
 zipHeaderPairs :: [(BS.ByteString, BS.ByteString)] -> BS.ByteString
-zipHeaderPairs pairs = BS.intercalate "," $ map f pairs
-  where
-    f = (\(k, v) -> k <> "=\"" <> v <> "\"")
+zipHeaderPairs pairs = BS.intercalate "," $ map (\(k, v) -> k <> "=\"" <> v <> "\"") pairs
 
 generateSigningString :: Request -> BS.ByteString -> IO BS.ByteString
 generateSigningString request keyId =
