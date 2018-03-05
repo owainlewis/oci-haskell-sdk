@@ -22,7 +22,12 @@ quoted s = "\"" ++ s ++ "\""
 --
 signWithPrivateKey :: String -> String -> IO BS.ByteString
 signWithPrivateKey privateKeyPath input =
-    let cmd = concat ["printf '%b' ", quoted input, " | openssl dgst -sha256 -sign ", privateKeyPath, " | openssl enc -e -base64 | tr -d '\n'"]
+    let cmd = concat [ "printf '%b' "
+                     , quoted input
+                     , " | openssl dgst -sha256 -sign "
+                     , privateKeyPath
+                     , " | openssl enc -e -base64 | tr -d '\n'"
+                     ]
     in do
       (_, stdin, stderr) <- readCreateProcessWithExitCode (shell cmd) []
       if stderr == "" then return (C8.pack stdin)

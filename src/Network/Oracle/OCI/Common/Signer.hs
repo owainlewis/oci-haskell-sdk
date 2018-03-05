@@ -34,7 +34,7 @@ import qualified Network.HTTP.Client                     as H
 import           Network.HTTP.Simple
 import qualified Network.HTTP.Types                      as H
 
-import           Network.Oracle.OCI.Common.Configuration (Configuration)
+import           Network.Oracle.OCI.Common.Configuration (Credentials)
 import qualified Network.Oracle.OCI.Common.OpenSSL       as OpenSSL
 
 type HeaderTransformer = H.Request -> IO H.Request
