@@ -102,27 +102,7 @@ addAuthHeader request keyId =
                                         ]
   return $ setRequestHeader "authorization" ["Signature " <> requestSignature] request
 
-key = "ocid1.tenancy.oc1..aaaaaaaaxf3fuazosc6xng7l75rj6uist5jb6ken64t3qltimxnkymddqbma/ocid1.user.oc1..aaaaaaaa3p67n2kmpxnbcnffjow6j5bhe6jze3obob3cjdctfftyfd4zou2q/a4:bb:34:43:54:c5:af:a5:4b:23:ce:82:2d:7f:12:45"
-
-signRequest :: Request -> IO Request
-signRequest req = do
+signRequest :: Request -> BS.ByteString -> IO Request
+signRequest req key = do
   req' <- addDefaultHeaders req >>= (flip addAuthHeader key)
   return req'
-
-signAndDispatchRequest req = do
-  req' <- signRequest req
-  httpLBS req'
-
-doRequest :: H.Request -> IO Int
-doRequest request = do
-  response <- httpLBS request
-  return $ getResponseStatusCode response
-
-demoRequest :: H.Request
-demoRequest =
-        setRequestHost "identity.us-ashburn-1.oraclecloud.com"
-      $ setRequestPath "/20160918/compartments"
-      $ setRequestSecure True
-      $ setRequestPort 443
-      $ setRequestQueryString [("compartmentId", Just "ocid1.tenancy.oc1..aaaaaaaaxf3fuazosc6xng7l75rj6uist5jb6ken64t3qltimxnkymddqbma")]
-      $ H.defaultRequest
