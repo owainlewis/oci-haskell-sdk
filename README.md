@@ -31,12 +31,12 @@ import qualified Network.HTTP.Types                    as H
 
 listCompartmentsRequest :: H.Request
 listCompartmentsRequest =
-            setRequestHost "identity.us-ashburn-1.oraclecloud.com"
-	  $ setRequestPath "/20160918/compartments"
-	  $ setRequestSecure True
-	  $ setRequestPort 443
-	  $ setRequestQueryString [("compartmentId", Just "ocid1.tenancy.oc1.")]
-	  $ H.defaultRequest
+      setRequestHost "identity.us-ashburn-1.oraclecloud.com"
+    $ setRequestPath "/20160918/compartments"
+    $ setRequestSecure True
+    $ setRequestPort 443
+    $ setRequestQueryString [("compartmentId", Just "ocid1.tenancy.oc1.")]
+    $ H.defaultRequest
 
 main :: IO (Response LBS.ByteString)
 main = do
