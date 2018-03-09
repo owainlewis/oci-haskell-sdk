@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections     #-}
-module Network.Oracle.OCI.Common.OpenSSL
+module Network.Oracle.OCI.Common.Signatures.OpenSSL
   ( signWithPrivateKey )
   where
 

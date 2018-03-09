@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 ------------------------------------------------------------------------------
 --- |
---- Module      :  Network.Oracle.OCI.Common.Signer
+--- Module      :  Network.Oracle.OCI.Common.Signatures.Signer
 --- License     :  BSD-style (see the file LICENSE)
 ---
 --- Maintainer  :  Owain Lewis <owain.lewis@oracle.com>
@@ -18,27 +18,27 @@
 ---   3. Create the signature from the signing string, using your private key and the RSA-SHA256 algorithm.
 ---   4. Add the resulting signature and other required information to the Authorization header in the request.
 ------------------------------------------------------------------------------
-module Network.Oracle.OCI.Common.Signer
+module Network.Oracle.OCI.Common.Signatures.Signer
   ( signRequest
   , computeSignature
   ) where
 
-import qualified Data.ByteString                       as BS
-import qualified Data.ByteString.Char8                 as C8
-import           Data.CaseInsensitive                  (original)
-import           Data.Char                             (toLower)
-import           Data.Monoid                           ((<>))
-import qualified Data.Text                             as T
+import qualified Data.ByteString                              as BS
+import qualified Data.ByteString.Char8                        as C8
+import           Data.CaseInsensitive                         (original)
+import           Data.Char                                    (toLower)
+import           Data.Monoid                                  ((<>))
+import qualified Data.Text                                    as T
 import           Data.Time
-import qualified Network.HTTP.Client                   as H
+import qualified Network.HTTP.Client                          as H
 import           Network.HTTP.Simple
-import qualified Network.HTTP.Types                    as H
+import qualified Network.HTTP.Types                           as H
 
-import           Network.Oracle.OCI.Common.Credentials (Credentials (..),
-                                                        getKeyID)
-import qualified Network.Oracle.OCI.Common.OpenSSL     as OpenSSL
+import           Network.Oracle.OCI.Common.Credentials        (Credentials (..),
+                                                               getKeyID)
+import qualified Network.Oracle.OCI.Common.Signatures.OpenSSL as OpenSSL
 
-import           Data.Text.Encoding                    (encodeUtf8)
+import           Data.Text.Encoding                           (encodeUtf8)
 
 type HeaderTransformer = H.Request -> IO H.Request
 
@@ -79,17 +79,19 @@ addDefaultHeaders request =
 computeSignature :: Request -> String
 computeSignature request = C8.unpack $ BS.intercalate "\n" hdrs
   where
-    hdrs = map (\(k, v) -> original k <> ": " <> v) (H.requestHeaders request)
+    mandatoryHeaders = defaultGenericHeaders ++ defaultBodyHeaders
+    filteredHeaders = filter (\(k, v) -> original k `elem` mandatoryHeaders) (H.requestHeaders request)
+    hdrs = map (\(k, v) -> original k <> ": " <> v) filteredHeaders
 
-base64EncodedRequestSignature :: FilePath -> Request -> IO BS.ByteString
-base64EncodedRequestSignature keyPath request = do
+encodeAndSignRequest :: FilePath -> Request -> IO BS.ByteString
+encodeAndSignRequest keyPath request = do
   let signature = computeSignature request
   OpenSSL.signWithPrivateKey keyPath signature
 
 addAuthHeader :: Credentials -> Request -> IO Request
 addAuthHeader credentials request =
   let headers = (BS.intercalate " ") . map (original . fst) . H.requestHeaders in do
-  signature <- base64EncodedRequestSignature (T.unpack $ keyFile credentials) request
+  signature <- encodeAndSignRequest (T.unpack $ keyFile credentials) request
   let key = encodeUtf8 (getKeyID credentials)
       requestSignature = zipHeaderPairs [ ("headers", headers request)
                                         , ("keyId", key)

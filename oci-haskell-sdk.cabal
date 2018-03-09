@@ -44,7 +44,7 @@ library
     , time
   exposed-modules:
       Network.Oracle.OCI.Common.Credentials
-      Network.Oracle.OCI.Common.Signer
+      Network.Oracle.OCI.Common.Signature.Signer
   other-modules:
       Network.Oracle.OCI
       Network.Oracle.OCI.Common.OpenSSL

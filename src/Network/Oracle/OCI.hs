@@ -1,20 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Network.Oracle.OCI where
 
+import qualified Network.Oracle.OCI.Common.Client      as Client
 import           Network.Oracle.OCI.Common.Credentials (readCredentialsFromFile)
-import           Network.Oracle.OCI.Common.Signer
 
 import qualified Data.ByteString.Char8                 as C8
+import qualified Data.ByteString.Lazy                  as LBS
 import qualified Network.HTTP.Client                   as H
 import           Network.HTTP.Simple
 import qualified Network.HTTP.Types                    as H
-
-key = "ocid1.tenancy.oc1..aaaaaaaaxf3fuazosc6xng7l75rj6uist5jb6ken64t3qltimxnkymddqbma/ocid1.user.oc1..aaaaaaaa3p67n2kmpxnbcnffjow6j5bhe6jze3obob3cjdctfftyfd4zou2q/a4:bb:34:43:54:c5:af:a5:4b:23:ce:82:2d:7f:12:45"
-
-doRequest :: H.Request -> IO Int
-doRequest request = do
-  response <- httpLBS request
-  return $ getResponseStatusCode response
 
 demoRequest :: H.Request
 demoRequest =
@@ -25,6 +19,7 @@ demoRequest =
       $ setRequestQueryString [("compartmentId", Just "ocid1.tenancy.oc1..aaaaaaaaxf3fuazosc6xng7l75rj6uist5jb6ken64t3qltimxnkymddqbma")]
       $ H.defaultRequest
 
+main :: IO (Response LBS.ByteString)
 main = do
   credentials <- readCredentialsFromFile "/Users/owainlewis/.oci/config" "DEFAULT"
-  signRequest credentials demoRequest >>= httpLBS
+  Client.requestLBS credentials demoRequest
