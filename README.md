@@ -17,9 +17,9 @@ import qualified Network.HTTP.Client                   as H
 import           Network.HTTP.Simple
 import qualified Network.HTTP.Types                    as H
 
-demoRequest :: H.Request
-demoRequest =
-		setRequestHost "identity.us-ashburn-1.oraclecloud.com"
+listCompartmentsRequest :: H.Request
+listCompartmentsRequest =
+            setRequestHost "identity.us-ashburn-1.oraclecloud.com"
 	  $ setRequestPath "/20160918/compartments"
 	  $ setRequestSecure True
 	  $ setRequestPort 443
@@ -29,7 +29,7 @@ demoRequest =
 main :: IO (Response LBS.ByteString)
 main = do
   credentials <- readCredentialsFromFile "/Users/owainlewis/.oci/config" "DEFAULT"
-  Client.requestLBS credentials demoRequest
+  Client.requestLBS credentials listCompartmentsRequest
 ```
 
 ## Links and references
