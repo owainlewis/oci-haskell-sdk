@@ -54,7 +54,7 @@ newCredentials
   -> Maybe T.Text
   -> Credentials
 newCredentials u t r k f p = Credentials u t r k f p
-*
+
 instance KeyProvider Credentials where
   getKeyID (Credentials user tenancy _ _ fingerprint _) =
       tenancy <> "/" <> user <> "/" <> fingerprint
@@ -87,10 +87,10 @@ data CredentialsException = CredentialsException String
 instance E.Exception CredentialsException
 
 readCredentialsFromFile :: FilePath
-  -> T.Text
+  -> String
   -> IO Credentials
 readCredentialsFromFile filePath section = do
-    result <- flip parseCredentials section <$> TIO.readFile filePath
+    result <- flip parseCredentials (T.pack section) <$> TIO.readFile filePath
     case result of
       Left e            -> E.throwIO (CredentialsException . show $ e)
       Right credentials -> return credentials

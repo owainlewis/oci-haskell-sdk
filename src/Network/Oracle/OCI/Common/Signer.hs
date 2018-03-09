@@ -23,19 +23,22 @@ module Network.Oracle.OCI.Common.Signer
   , computeSignature
   ) where
 
-import qualified Data.ByteString                         as BS
-import qualified Data.ByteString.Char8                   as C8
-import           Data.CaseInsensitive                    (original)
-import           Data.Char                               (toLower)
-import           Data.Monoid                             ((<>))
-import qualified Data.Text                               as T
+import qualified Data.ByteString                       as BS
+import qualified Data.ByteString.Char8                 as C8
+import           Data.CaseInsensitive                  (original)
+import           Data.Char                             (toLower)
+import           Data.Monoid                           ((<>))
+import qualified Data.Text                             as T
 import           Data.Time
-import qualified Network.HTTP.Client                     as H
+import qualified Network.HTTP.Client                   as H
 import           Network.HTTP.Simple
-import qualified Network.HTTP.Types                      as H
+import qualified Network.HTTP.Types                    as H
 
-import           Network.Oracle.OCI.Common.Credentials (Credentials, getKeyID)
-import qualified Network.Oracle.OCI.Common.OpenSSL       as OpenSSL
+import           Network.Oracle.OCI.Common.Credentials (Credentials (..),
+                                                        getKeyID)
+import qualified Network.Oracle.OCI.Common.OpenSSL     as OpenSSL
+
+import           Data.Text.Encoding                    (encodeUtf8)
 
 type HeaderTransformer = H.Request -> IO H.Request
 
@@ -86,10 +89,10 @@ base64EncodedRequestSignature keyPath request = do
 addAuthHeader :: Credentials -> Request -> IO Request
 addAuthHeader credentials request =
   let headers = (BS.intercalate " ") . map (original . fst) . H.requestHeaders in do
-  signature <- base64EncodedRequestSignature "" request
-  let keyID = C8.pack . T.unpack $ getKeyID credentials
+  signature <- base64EncodedRequestSignature (T.unpack $ keyFile credentials) request
+  let key = encodeUtf8 (getKeyID credentials)
       requestSignature = zipHeaderPairs [ ("headers", headers request)
-                                        , ("keyId", keyID)
+                                        , ("keyId", key)
                                         , ("algorithm", "rsa-sha256")
                                         , ("signature", signature)
                                         ]
