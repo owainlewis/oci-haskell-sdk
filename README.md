@@ -6,8 +6,9 @@ This library provides a Haskell interface for working with the Oracle Bare Metal
 
 ## TODO
 
-- [x] Request signing for GET|DELETE requests
-- [ ] Request signing for POST|PUT requests
+- [x] Request signing for get and delete requests
+- [ ] Request signing for post and put requests
+- [ ] Basic client abstraction with support for modifying transport 
 - [ ] Basic integration tests
 - [ ] Code generation for core compute client
 - [ ] Code generation for identity client
