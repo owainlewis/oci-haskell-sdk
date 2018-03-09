@@ -1,8 +1,8 @@
 # OCI Haskell SDK
 
-### Haskell SDK for Oracle Cloud Infrastructure
+### Haskell SDK for Oracle Cloud Infrastructure (WIP)
 
-This library provides a Haskell interface for working with the Oracle Bare Metal Cloud
+This library provides a Haskell interface for working with the Oracle Bare Metal Cloud.
 
 ## TODO
 
