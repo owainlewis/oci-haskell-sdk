@@ -4,6 +4,17 @@
 
 This library provides a Haskell interface for working with the Oracle Bare Metal Cloud
 
+## TODO
+
+- [x] Request signing for GET|DELETE requests
+- [ ] Request signing for POST|PUT requests
+- [ ] Basic integration tests
+- [ ] Code generation for core compute client
+- [ ] Code generation for identity client
+- [ ] Support for instance principals and token based federation
+
+## Examples
+
 ```haskell
 {-# LANGUAGE OverloadedStrings #-}
 module Network.Oracle.OCI where
