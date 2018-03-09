@@ -23,7 +23,7 @@ listCompartmentsRequest =
 	  $ setRequestPath "/20160918/compartments"
 	  $ setRequestSecure True
 	  $ setRequestPort 443
-	  $ setRequestQueryString [("compartmentId", Just "ocid1.tenancy.oc1..aaaaaaaaxf3fuazosc6xng7l75rj6uist5jb6ken64t3qltimxnkymddqbma")]
+	  $ setRequestQueryString [("compartmentId", Just "ocid1.tenancy.oc1.")]
 	  $ H.defaultRequest
 
 main :: IO (Response LBS.ByteString)
