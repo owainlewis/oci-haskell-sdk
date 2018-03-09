@@ -29,7 +29,7 @@ dependencies:
 library:
   source-dirs: src
   exposed-modules:
-  - Network.Oracle.OCI.Common.Configuration
+  - Network.Oracle.OCI.Common.Credentials
   - Network.Oracle.OCI.Common.Signer
 
 tests:

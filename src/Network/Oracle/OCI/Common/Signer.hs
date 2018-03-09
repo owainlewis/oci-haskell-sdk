@@ -34,7 +34,7 @@ import qualified Network.HTTP.Client                     as H
 import           Network.HTTP.Simple
 import qualified Network.HTTP.Types                      as H
 
-import           Network.Oracle.OCI.Common.Configuration (Credentials)
+import           Network.Oracle.OCI.Common.Credentials (Credentials, getKeyID)
 import qualified Network.Oracle.OCI.Common.OpenSSL       as OpenSSL
 
 type HeaderTransformer = H.Request -> IO H.Request
@@ -66,43 +66,37 @@ addDateHeader request = do
   return $ setRequestHeader "date" [now] request
 
 addDefaultHeaders :: Request -> IO Request
-addDefaultHeaders request = addDateHeader request >>= addHostHeader >>= addRequestTargetHeader
+addDefaultHeaders request =
+      addDateHeader request
+  >>= addHostHeader
+  >>= addRequestTargetHeader
 
-computeSignature :: Request -> BS.ByteString
-computeSignature request = BS.intercalate "\n" hdrs
+-- | TODO filter these by the set of known hdrs above
+--
+computeSignature :: Request -> String
+computeSignature request = C8.unpack $ BS.intercalate "\n" hdrs
   where
     hdrs = map (\(k, v) -> original k <> ": " <> v) (H.requestHeaders request)
 
-base64EncodedRequestSignature :: Request -> IO BS.ByteString
-base64EncodedRequestSignature request = do
+base64EncodedRequestSignature :: FilePath -> Request -> IO BS.ByteString
+base64EncodedRequestSignature keyPath request = do
   let signature = computeSignature request
-  OpenSSL.signWithPrivateKey "/Users/owainlewis/.oci/oci_api_key.pem" (C8.unpack signature)
+  OpenSSL.signWithPrivateKey keyPath signature
 
-zipHeaderPairs :: [(BS.ByteString, BS.ByteString)] -> BS.ByteString
-zipHeaderPairs pairs = BS.intercalate "," $ map (\(k, v) -> k <> "=\"" <> v <> "\"") pairs
-
-generateSigningString :: Request -> BS.ByteString -> IO BS.ByteString
-generateSigningString request keyId =
+addAuthHeader :: Credentials -> Request -> IO Request
+addAuthHeader credentials request =
   let headers = (BS.intercalate " ") . map (original . fst) . H.requestHeaders in do
-  signature <- base64EncodedRequestSignature request
-  return $ zipHeaderPairs [ ("headers", headers request)
-                          , ("keyId", keyId)
-                          , ("algorithm", "rsa-sha256")
-                          , ("signature", signature)
-                          ]
-
-addAuthHeader :: Request -> BS.ByteString -> IO Request
-addAuthHeader request keyId =
-  let headers = (BS.intercalate " ") . map (original . fst) . H.requestHeaders in do
-  signature <- base64EncodedRequestSignature request
-  let requestSignature = zipHeaderPairs [ ("headers", headers request)
-                                        , ("keyId", keyId)
+  signature <- base64EncodedRequestSignature "" request
+  let keyID = C8.pack . T.unpack $ getKeyID credentials
+      requestSignature = zipHeaderPairs [ ("headers", headers request)
+                                        , ("keyId", keyID)
                                         , ("algorithm", "rsa-sha256")
                                         , ("signature", signature)
                                         ]
   return $ setRequestHeader "authorization" ["Signature " <> requestSignature] request
 
-signRequest :: Request -> BS.ByteString -> IO Request
-signRequest req key = do
-  req' <- addDefaultHeaders req >>= (flip addAuthHeader key)
-  return req'
+zipHeaderPairs :: [(BS.ByteString, BS.ByteString)] -> BS.ByteString
+zipHeaderPairs pairs = BS.intercalate "," $ map (\(k, v) -> k <> "=\"" <> v <> "\"") pairs
+
+signRequest :: Credentials -> Request -> IO Request
+signRequest credentials req = addDefaultHeaders req >>= addAuthHeader credentials

@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 76bce0de7b50e957fc63c5b8eaa9b1760251f4b96126233295cd227130577321
+-- hash: f8f599a9764933a8f8e3e536f10e4189cd1b6d095ded505e8840e2ead6d90485
 
 name:           oci-haskell-sdk
 version:        0.1.0.0
@@ -43,7 +43,7 @@ library
     , text
     , time
   exposed-modules:
-      Network.Oracle.OCI.Common.Configuration
+      Network.Oracle.OCI.Common.Credentials
       Network.Oracle.OCI.Common.Signer
   other-modules:
       Network.Oracle.OCI
