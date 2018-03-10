@@ -15,9 +15,10 @@ data OCISDKException = RequestSignException String
 
 instance E.Exception OCISDKException
 
--- | Sign an input string using open SSL and the private key supplied
+-- | Sign an input string using open SSL and the private key supplied.
+--   This is non ideal but neither are the Haskell crypto libs I tried.
 --
-signWithPrivateKey :: String -> String -> IO BS.ByteString
+signWithPrivateKey :: FilePath -> String -> IO BS.ByteString
 signWithPrivateKey privateKeyPath input =
     let quoted s = "\"" ++ s ++ "\""
         cmd = concat [ "printf '%b' "

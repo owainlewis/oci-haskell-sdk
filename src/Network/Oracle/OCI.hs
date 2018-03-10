@@ -19,7 +19,7 @@ demoRequest =
       $ setRequestQueryString [("compartmentId", Just "ocid1.tenancy.oc1..aaaaaaaaxf3fuazosc6xng7l75rj6uist5jb6ken64t3qltimxnkymddqbma")]
       $ H.defaultRequest
 
-main :: IO (Response LBS.ByteString)
+main :: IO Client.APIResponse
 main = do
   credentials <- readCredentialsFromFile "/Users/owainlewis/.oci/config" "DEFAULT"
-  Client.requestLBS credentials demoRequest
+  Client.runRequest credentials demoRequest
