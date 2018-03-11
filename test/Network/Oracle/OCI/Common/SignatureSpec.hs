@@ -4,13 +4,13 @@ module Network.Oracle.OCI.Common.SignatureSpec
   , spec
   ) where
 
-import qualified Network.HTTP.Client              as H
+import qualified Network.HTTP.Client                         as H
 import           Network.HTTP.Simple
-import qualified Network.Oracle.OCI.Common.Signer as S
+import qualified Network.Oracle.OCI.Common.Signatures.Signer as S
 import           Test.Hspec
 
-testRequest :: H.Request
-testRequest =
+listInstancesRequest :: H.Request
+listInstancesRequest =
         setRequestHost "iaas.us-phoenix-1.oraclecloud.com"
       $ setRequestPath "/20160918/instances"
       $ setRequestSecure True
@@ -29,7 +29,4 @@ spec :: Spec
 spec = do
   describe "Deriving request signatures" $ do
     it "returns the correct request signature" $ do
-      req <- S.signRequest testRequest
-      let signature = S.computeSignature req
-      print (show signature)
       1 `shouldBe` (1 :: Int)

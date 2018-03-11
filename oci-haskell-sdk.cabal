@@ -44,11 +44,8 @@ library
     , time
   exposed-modules:
       Network.Oracle.OCI.Common.Credentials
-      Network.Oracle.OCI.Common.Signature.Signer
+      Network.Oracle.OCI.Common.Signatures.Signer
   other-modules:
-      Network.Oracle.OCI
-      Network.Oracle.OCI.Common.OpenSSL
-      Network.Oracle.OCI.Common.Region
       Paths_oci_haskell_sdk
   default-language: Haskell2010
 

@@ -4,7 +4,7 @@ module Network.Oracle.OCI.Common.CredentialsSpec
   , spec
   ) where
 
-import           Network.Oracle.OCI.Common.Configuration
+import           Network.Oracle.OCI.Common.Credentials
 import           Test.Hspec
 
 main :: IO ()
