@@ -29,16 +29,14 @@ import           Data.CaseInsensitive                         (original)
 import           Data.Char                                    (toLower)
 import           Data.Monoid                                  ((<>))
 import qualified Data.Text                                    as T
+import           Data.Text.Encoding                           (encodeUtf8)
 import           Data.Time
 import qualified Network.HTTP.Client                          as H
 import           Network.HTTP.Simple
 import qualified Network.HTTP.Types                           as H
-
 import           Network.Oracle.OCI.Common.Credentials        (Credentials (..),
                                                                getKeyID)
 import qualified Network.Oracle.OCI.Common.Signatures.OpenSSL as OpenSSL
-
-import           Data.Text.Encoding                           (encodeUtf8)
 
 type HeaderTransformer = H.Request -> IO H.Request
 
@@ -74,6 +72,9 @@ addDefaultHeaders request =
   >>= addHostHeader
   >>= addRequestTargetHeader
 
+addAllHeaders :: Request -> IO Request
+addAllHeaders request = addDefaultHeaders request
+
 -- | TODO filter these by the set of known hdrs above
 --
 computeSignature :: Request -> String
@@ -104,4 +105,8 @@ zipHeaderPairs :: [(BS.ByteString, BS.ByteString)] -> BS.ByteString
 zipHeaderPairs pairs = BS.intercalate "," $ map (\(k, v) -> k <> "=\"" <> v <> "\"") pairs
 
 signRequest :: Credentials -> Request -> IO Request
-signRequest credentials req = addDefaultHeaders req >>= addAuthHeader credentials
+signRequest credentials req =
+  if (H.method req) == "GET" ||
+     (H.method req) == "DELETE"
+  then addDefaultHeaders req >>= addAuthHeader credentials
+  else addAllHeaders req >>= addAuthHeader credentials
