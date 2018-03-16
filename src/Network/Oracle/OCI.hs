@@ -19,7 +19,17 @@ demoRequest =
       $ setRequestQueryString [("compartmentId", Just "ocid1.tenancy.oc1..aaaaaaaaxf3fuazosc6xng7l75rj6uist5jb6ken64t3qltimxnkymddqbma")]
       $ H.defaultRequest
 
+launchInstanceRequest :: H.Request
+launchInstanceRequest =
+        setRequestHost "iaas.us-ashburn-1.oraclecloud.com"
+      $ setRequestPath "/20160918/instances/"
+      $ setRequestMethod "POST"
+      $ setRequestSecure True
+      $ setRequestPort 443
+      $ setRequestQueryString [("compartmentId", Just "ocid1.tenancy.oc1..aaaaaaaaxf3fuazosc6xng7l75rj6uist5jb6ken64t3qltimxnkymddqbma")]
+      $ H.defaultRequest
+
 main :: IO Client.APIResponse
 main = do
   credentials <- readCredentialsFromFile "/Users/owainlewis/.oci/config" "DEFAULT"
-  Client.runRequest credentials demoRequest
+  Client.runRequest credentials launchInstanceRequest
