@@ -42,9 +42,11 @@ library
     , process
     , text
     , time
+    , cryptonite
   exposed-modules:
       Network.Oracle.OCI.Common.Credentials
       Network.Oracle.OCI.Common.Signatures.Signer
+      Network.Oracle.OCI.Common.Signatures.OpenSSL
   other-modules:
       Paths_oci_haskell_sdk
   default-language: Haskell2010

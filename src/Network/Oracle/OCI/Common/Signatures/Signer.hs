@@ -23,6 +23,9 @@ module Network.Oracle.OCI.Common.Signatures.Signer
   , computeSignature
   ) where
 
+import           Crypto.Hash                                  (Digest,
+                                                               SHA256 (..),
+                                                               hash)
 import qualified Data.ByteString                              as BS
 import qualified Data.ByteString.Char8                        as C8
 import           Data.CaseInsensitive                         (original)
@@ -45,6 +48,9 @@ defaultGenericHeaders = ["date", "(request-target)", "host"]
 
 defaultBodyHeaders :: [BS.ByteString]
 defaultBodyHeaders = ["content-length", "content-type", "x-content-sha256"]
+
+getDigest :: BS.ByteString -> Digest SHA256
+getDigest bs = hash bs
 
 -- | Add a request target header to a request. This is needed by all requests
 --
