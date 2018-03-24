@@ -25,6 +25,7 @@ dependencies:
 - directory
 - process
 - case-insensitive
+- memory
 
 library:
   source-dirs: src

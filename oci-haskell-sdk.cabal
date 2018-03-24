@@ -32,6 +32,7 @@ library
       aeson
     , base >=4.7 && <5
     , bytestring
+    , base64-bytestring
     , case-insensitive
     , directory
     , http-client
