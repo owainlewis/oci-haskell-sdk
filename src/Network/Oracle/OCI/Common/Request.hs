@@ -17,12 +17,19 @@ data OCIRequest = OCIRequest {
     host        :: BS.ByteString
   , path        :: BS.ByteString
   , method      :: BS.ByteString
-  , body        :: Maybe BS.ByteString
+  , body        :: Maybe LBS.ByteString
   , headers     :: [Pair]
   , queryString :: Maybe [Pair]
 } deriving ( Eq, Ord, Show )
 
---addQueryString = -- $ setRequestQueryString [("compartmentId", Just "ocid1.tenancy.oc1..aaaaaaaaxf3fuazosc6xng7l75rj6uist5jb6ken64t3qltimxnkymddqbma")]
+assignRequestQuery :: Maybe [(ByteString, ByteString)] -> Request -> Request
+assignRequestQuery (Just queryString) req =
+    setRequestQueryString (Prelude.map (\(a,b) -> (a, Just b)) queryString) req
+assignRequestQuery (Nothing) req = req
+
+assignRequestBody :: Maybe LBS.ByteString -> Request -> Request
+assignRequestBody (Just bs) req = setRequestBodyLBS bs req
+assignRequestBody (Nothing) req = req
 
 toRequest :: OCIRequest -> H.Request
 toRequest (OCIRequest host path method hdrs body query) =
@@ -30,5 +37,7 @@ toRequest (OCIRequest host path method hdrs body query) =
                      $ setRequestPath path
                      $ setRequestMethod method
                      $ setRequestSecure True
-                     $ H.defaultRequest in
-      basicRequest
+                     $ H.defaultRequest
+        intermediateRequest = assignRequestQuery query basicRequest in
+        intermediateRequest
+--        assignRequestBody body intermediateRequest
