@@ -31,13 +31,12 @@ assignRequestBody :: Maybe LBS.ByteString -> Request -> Request
 assignRequestBody (Just bs) req = setRequestBodyLBS bs req
 assignRequestBody (Nothing) req = req
 
+-- | Converts our intermal request structure into a Network.HTTP.Types.Request
 toRequest :: OCIRequest -> H.Request
-toRequest (OCIRequest host path method hdrs body query) =
+toRequest (OCIRequest host path method body hdrs query) =
     let basicRequest = setRequestHost host
                      $ setRequestPath path
                      $ setRequestMethod method
                      $ setRequestSecure True
-                     $ H.defaultRequest
-        intermediateRequest = assignRequestQuery query basicRequest in
-        intermediateRequest
---        assignRequestBody body intermediateRequest
+                     $ H.defaultRequest in
+    assignRequestBody body $ assignRequestQuery query basicRequest
