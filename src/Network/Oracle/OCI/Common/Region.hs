@@ -13,4 +13,4 @@ instance Show Region where
   show (Phoenix)   = "us-phoenix-1"
   show (Ashburn)   = "us-ashburn-1"
   show (Frankfurt) = "eu-frankfurt-1"
-  show (London)    = error "TODO"
+  show (London)    = "uk-london-1"
